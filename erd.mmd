@@ -1,0 +1,70 @@
+erDiagram
+    AUTH_USERS ||--o| PROFILES : "identity"
+    PROFILES ||--o{ USER_FARM_ROLES : "member"
+    FARMS ||--|{ USER_FARM_ROLES : "scope (at least one ADMIN via RPC)"
+    FARMS ||--o{ SALES : "records"
+    FARMS ||--o{ AUDIT_LOGS : "audit scope"
+    PROFILES ||--o{ FARMS : "creates / updates"
+    PROFILES ||--o{ SALES : "creates / updates"
+    PROFILES ||--o{ USER_FARM_ROLES : "grants / updates"
+    PROFILES o|--o{ AUDIT_LOGS : "actor"
+    AUTH_USERS {
+        uuid id PK
+    }
+    PROFILES {
+        uuid id PK,FK
+        text display_name
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    FARMS {
+        uuid id PK
+        text name
+        text produce_name
+        share_input default_share_input
+        boolean is_active
+        integer version
+        uuid created_by FK
+        uuid updated_by FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    USER_FARM_ROLES {
+        uuid farm_id PK,FK
+        uuid user_id PK,FK
+        farm_role role
+        uuid created_by FK
+        uuid updated_by FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    SALES {
+        uuid id PK
+        uuid farm_id FK
+        date sale_date
+        text produce_name_snapshot
+        share_input share_input_type
+        numeric weight_kg
+        numeric unit_price
+        numeric input_share
+        numeric total_amount "generated"
+        numeric owner_share "generated"
+        numeric worker_share "generated"
+        integer version
+        uuid created_by FK
+        uuid updated_by FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    AUDIT_LOGS {
+        bigint id PK
+        uuid farm_id FK
+        text table_name
+        jsonb record_key "polymorphic key, not FK"
+        text action
+        uuid actor_id FK "nullable system actor"
+        jsonb old_data
+        jsonb new_data
+        timestamptz occurred_at
+        bigint transaction_id
+    }

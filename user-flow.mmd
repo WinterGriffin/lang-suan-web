@@ -1,0 +1,33 @@
+flowchart TD
+    A[เข้าสู่ระบบ / Supabase Auth] --> B{มี Farm ที่มีสิทธิ์หรือไม่}
+    B -- ไม่มี --> C[Onboarding / ติดต่อผู้ดูแล]
+    B -- มี --> D[Dashboard: Farm + เดือน + KPI comparison]
+    D --> E[Sales List]
+    D --> F[Create Sale]
+    E --> F
+    F --> G[Farm + วันที่ Bangkok วันนี้ + น้ำหนัก + ราคา]
+    G --> H[อ่าน default_share_input จาก Farm]
+    H --> I[กรอก OWNER หรือ WORKER เพียงด้านเดียว]
+    I --> J[คำนวณ total + อีกด้าน]
+    J --> K{ข้อมูลผ่าน validation?}
+    K -- ไม่ผ่าน --> I
+    K -- ผ่าน --> L[Save RPC: ตรวจสิทธิ์ / snapshot / generated totals]
+    L --> M{สำเร็จ?}
+    M -- error --> N[เก็บ draft + UUID / แก้ไข / retry]
+    N --> L
+    M -- สำเร็จ --> O[Sale Detail + success toast]
+    E --> O
+    O --> P[Edit: คง Farm และ snapshot]
+    P --> Q[Save พร้อม expected_version]
+    Q --> R{version ตรงหรือไม่?}
+    R -- ตรง --> O
+    R -- ไม่ตรง --> S[เก็บ draft / โหลดล่าสุด / reconcile]
+    D --> T[Farm List → Farm Detail]
+    T --> U[ADMIN แก้ produce / default share / active]
+    U --> V[ยืนยันเปลี่ยน rule; มีผลเฉพาะรายการใหม่]
+    D --> W[Reports: เดือน / ปี / Farm]
+    W --> X[เลือกปี / Farm / metric]
+    X --> Y[RLS aggregate → chart + exact values table]
+    L -. transaction .-> Z[Append Audit Log]
+    Q -. transaction .-> Z
+    U -. transaction .-> Z
