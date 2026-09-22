@@ -1,0 +1,1 @@
+.income-line,.latest-list a{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}.income-line b,.latest-list b{font-variant-numeric:tabular-nums}.latest-list a:last-child,.income-line:last-of-type{border-bottom:0}@media(max-width:760px){.latest-list a{align-items:start;flex-direction:column;gap:0}}

@@ -1,0 +1,1 @@
+:focus-visible{outline:3px solid #a37421;outline-offset:3px}button,a,input,select{touch-action:manipulation}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}

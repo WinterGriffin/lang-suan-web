@@ -25,7 +25,11 @@ test("migration retains the frozen ledger, authorization, and RPC contracts", ()
 test("fixtures are explicitly isolated from production", () => {
   const seed = readFileSync("supabase/seed.sql", "utf8");
   const verification = readFileSync("supabase/tests/verification.sql", "utf8");
+  const analytics = readFileSync("supabase/tests/analytics.sql", "utf8");
   assert.match(seed, /Never run this on production/);
   assert.match(verification, /Never run against production/);
   assert.match(verification, /rollback;/);
+  assert.match(analytics, /Never run against production/);
+  assert.match(analytics, /generate_series\(1,1001\)/);
+  assert.match(analytics, /rollback;/);
 });

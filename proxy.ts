@@ -1,0 +1,4 @@
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+export async function proxy(request: NextRequest) { let response=NextResponse.next({request}); const s=createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,{cookies:{getAll:()=>request.cookies.getAll(),setAll:(all)=>{all.forEach(c=>request.cookies.set(c.name,c.value));response=NextResponse.next({request});all.forEach(c=>response.cookies.set(c.name,c.value,c.options))}}}); const {data: claims}=await s.auth.getClaims(); if(!claims&&request.nextUrl.pathname!=="/login"){const u=request.nextUrl.clone();u.pathname="/login";return NextResponse.redirect(u)} if(claims&&request.nextUrl.pathname==="/login")return NextResponse.redirect(new URL("/",request.url));return response }
+export const config={matcher:["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"]};

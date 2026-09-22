@@ -73,3 +73,103 @@
 
 - RLS suite ใช้ role `authenticated` และ `request.jwt.claims` ใน database session ตาม verification harness; ยังไม่ได้ทดสอบ browser/Auth-issued JWT ผ่าน GoTrue end-to-end. งานนี้อยู่ในขั้นที่ 3.
 - ยังไม่ได้ทำ true concurrent two-session test สำหรับ final-admin revocation หรือ save race; จะต้องรันเพิ่มก่อน production ตาม acceptance matrix.
+
+## ขั้นที่ 3: Authentication และสิทธิ์รายฟาร์ม — เสร็จใน local MVP
+
+### เสร็จแล้ว
+
+- เพิ่ม Supabase browser/server clients, cookie-based session refresh ใน `proxy.ts`, หน้าเข้าสู่ระบบ และออกจากระบบ โดยเรียก `ensure_profile` หลัง sign-in สำเร็จ.
+- Protected routes redirect ไป `/login` เมื่อไม่มี session; หน้าเข้าสู่ระบบจะแสดง error โดยไม่เผยรายละเอียดภายในของ Auth.
+- การแสดงฟาร์มและ Sale ใช้ public client ที่อยู่ภายใต้ JWT/RLS เท่านั้น ไม่มี service-role key ใน browser bundle หรือ source.
+
+### ผลตรวจจริง / ข้อจำกัด
+
+- `npm.cmd run typecheck`, `npm.cmd run build`, `npm.cmd test` ผ่านเมื่อ 22 กันยายน 2026.
+- ตรวจ HTTP จริง: `/login` ตอบ 200 และ `/` ที่ไม่มี cookie ถูก proxy redirect (307) ไปยัง login.
+- เปิด `/farms` ผ่าน browser โดยไม่มี session แล้วถูก redirect ไปหน้า login จริง; หน้าล็อกอินแสดง field ภาษาไทยและปุ่มเข้าสู่ระบบครบ.
+- ทดสอบ GoTrue/JWT จริงบน Supabase local ด้วยบัญชี development ที่สร้างเฉพาะการทดสอบ: sign-up + `ensure_profile`, ADMIN สร้าง/แก้ Farm, EDITOR สร้าง Sale, VIEWER อ่าน Farm/Sale/Audit แต่ write ถูกปฏิเสธ และ nonmember ไม่พบ Farm ที่ไม่ได้เป็นสมาชิก.
+- ทดสอบ browser จริง: login ไป Dashboard, ADMIN เห็น Farm editor, Create Sale `1.005 × 1.00 = 1.01`, Detail แสดง Audit, Edit เป็น `2.00` แล้ว version เพิ่มจาก 1 เป็น 2. VIEWER เห็น Farm แบบอ่านอย่างเดียวและปุ่มบันทึก Sale ถูก disable.
+- รัน `supabase/tests/verification.sql` แบบ rollback บน local database อีกครั้งหลังการทดสอบ UI ผ่าน และ `supabase db lint --local` ไม่พบ schema error.
+
+## ขั้นที่ 4: Farm List และ Farm Detail — เสร็จใน local MVP
+
+### เสร็จแล้ว
+
+- `/farms` อ่าน Farm และ membership ของผู้ใช้ผ่าน RLS, แสดงชื่อ ผลผลิต สถานะ ด้านที่กรอกส่วนแบ่ง และรายการขายล่าสุดห้ารายการ.
+- ADMIN เท่านั้นเห็นฟอร์มแก้ไขและเรียก `update_farm`; EDITOR/VIEWER เห็นรายละเอียดแบบอ่านอย่างเดียว. Database RPC/RLS ยังเป็นจุดบังคับสิทธิ์จริง.
+- การแก้ Farm ส่ง `expected_version`; เมื่อได้ `40001` จะเก็บ draft ไว้และเสนอให้โหลดข้อมูลล่าสุดโดยยืนยันก่อนทิ้ง draft.
+- การเปลี่ยนด้านส่วนแบ่งมีคำเตือนชัดเจนว่ามีผลกับ Sale ใหม่เท่านั้น; Farm ที่ปิดใช้ยังคงแสดงรายละเอียดและประวัติได้.
+
+### ยังไม่ได้ทดสอบ
+
+- ยังต้องทดสอบ visual responsive ที่ 320, 390 และ 1440px ก่อนปิดขั้นที่ 4 อย่างเป็นทางการ.
+
+## ขั้นที่ 5: Sale workflow — เสร็จใน local MVP
+
+### เสร็จแล้ว
+
+- เพิ่ม Create Sale, Sale Detail พร้อม Audit history และ Edit Sale ที่ใช้ `save_sale` RPC; Farm ของ Sale แก้ไม่ได้และ snapshot ยังคงเป็นของเดิม.
+- Create ใช้วันที่วันนี้ใน Asia/Bangkok, แสดงวันที่ภาษาไทยประกอบ ISO, คำนวณ decimal ด้วย `BigInt`, ตรวจ precision/range/share ก่อนส่ง และใช้ UUID เดิมตลอด retry เดียวกัน.
+- UI ซ่อนการบันทึกสำหรับ VIEWER, ป้องกันกดซ้ำ, เก็บ draft ใน browser เมื่อ server/network ยังยืนยันไม่ได้ และแสดงค่าที่ฐานข้อมูลตอบกลับผ่าน Detail.
+
+### ยังไม่ได้ทดสอบ / ยังไม่ครบ
+
+- ยังไม่ได้ทดสอบ Create/Edit ผ่าน browser กับ ADMIN/EDITOR/VIEWER และ network timeout จริง.
+- เพิ่ม input DD/MM/YYYY (พ.ศ.) และ custom Thai calendar ที่มีชื่อเดือนเต็ม/พ.ศ., ปุ่มเดือนก่อน-ถัดไป, วันนี้ และปิด; วันอนาคตถูก disable. ตรวจผ่าน browser สำหรับเดือนกันยายน 2569 แล้ว.
+- Keyboard arrow-key navigation ระหว่างวันใน calendar ยังไม่ได้ทำ; ปัจจุบันใช้ native text entry, Enter, ปุ่ม และ pointer/touch.
+
+## ขั้นที่ 6: Sales List และ Dashboard — เสร็จใน local MVP
+
+### เสร็จแล้ว
+
+- `/sales` ใช้ Farm/เดือน filter, เรียง `sale_date DESC, id DESC`, ดึงครั้งละ 25+1 แบบ keyset และแสดง total/count จาก `sales_summary` แยกจากหน้า list.
+- Dashboard ใช้ `sales_summary` สำหรับช่วงเดือนและเดือนก่อน, แสดงยอดขาย น้ำหนัก ราคาเฉลี่ยแบบ weighted และจำนวนครั้ง; prior=0 แสดง “ไม่มีฐานเปรียบเทียบ” หรือ “ไม่เปลี่ยนแปลง” แทน infinity.
+- Dashboard แสดงส่วนแบ่งรายได้, ยอดแต่ละ Farm และ Sale ล่าสุดจากข้อมูล RLS จริง; เดือนปัจจุบันติดป้ายยอดสะสมถึงวันนี้เทียบเดือนก่อนเต็มเดือน.
+
+### ผลตรวจจริง / ยังไม่ได้ทดสอบ
+
+- `npm.cmd run typecheck`, `npm.cmd run build` และ `npm.cmd test` ผ่านหลังเพิ่มหน้าดังกล่าว.
+- ใช้ JWT ของ VIEWER จริงเรียก `sales_summary` และ list ในเดือนเดียวกัน: summary มี 1 Farm, list เห็น 1 Sale และ count จาก aggregate ตรงกับแถวที่ RLS อนุญาต.
+- เพิ่ม `supabase/tests/analytics.sql` (rollback-only) และรันจริงบน local: aggregate ครบ 1,001 แถว, keyset continuation หลัง 25 แถวเหลือ 976 แถว, empty period ไม่คืน row และ weighted average `1kg×100 + 9kg×10 = 19.00`.
+- เพิ่ม analytics contract test สำหรับ weighted-average/zero-baseline/negative delta; `npm.cmd test` ผ่าน 4/4. ยังไม่ได้ตรวจ visual state ผ่าน browser ของข้อมูลมากกว่าหนึ่งหน้า จึงยังไม่ปิดขั้นที่ 6 อย่างเป็นทางการ.
+
+## ขั้นที่ 7: Reports — เสร็จใน local MVP
+
+### เสร็จแล้ว
+
+- เพิ่ม Reports แบบรายเดือน รายปี และเทียบฟาร์ม โดยอ่าน `sales_summary` เดียวกันและเลือก metric ยอดขาย/น้ำหนัก/ราคาเฉลี่ย/kg/จำนวนครั้ง.
+- ราคาเฉลี่ยใน Report คำนวณจากยอดและน้ำหนักรวมของ period/Farm ไม่เฉลี่ยค่าเฉลี่ยย่อย; เดือนอนาคตในปีปัจจุบันแสดง “ยังไม่ถึงช่วง”.
+- ตาราง responsive อยู่ภายในพื้นที่ scroll ของตนเองบนมือถือและจำกัด Farm ด้วย RLS ของ `sales_summary`.
+
+### ยังไม่ได้ทดสอบ
+
+- เพิ่มกราฟแท่งรายเดือนสี/legend ชัดเจน โดยใช้ `perMonth` data series เดียวกับตาราง และตารางยังเป็น accessible exact-value equivalent.
+- รัน `supabase/tests/analytics.sql` แบบ rollback จริง ครอบคลุม leap day 2024-02-29, ช่วงข้ามปี 2023-12/2024-01, empty period, 1,001 แถว และ weighted average. `npm.cmd test` ผ่าน 4/4, typecheck/build ผ่าน.
+- ยังไม่ทดสอบ Report UI ด้วย JWT ผู้ใช้ที่เข้าถึงหลาย Farm และยังไม่ตรวจ screenshot/responsive ที่ breakpoint เป้าหมายทั้งหมด.
+
+## ขั้นที่ 8: System review — เสร็จใน local/disposable environment
+
+### เสร็จแล้ว
+
+- ตรวจ source ตาม acceptance matrix และแก้ Sale Detail Audit ให้แสดง actor, เวลา และฟิลด์ธุรกิจที่เปลี่ยนจาก old/new data โดยไม่ลด RLS.
+- สร้าง [RELEASE-CHECKLIST.md](RELEASE-CHECKLIST.md) แยกผลผ่านจริง, สิ่งที่ยังไม่ได้ทดสอบ และเงื่อนไขต้องแก้ก่อน production.
+- ตรวจ tracked files: `.env.local` ไม่ถูก track; ไม่พบ service-role/secret key ใน application source. `npm.cmd test` 4/4, typecheck, build และ `git diff --check` ผ่าน.
+- ตรวจ browser local ที่ 320px และ 1440px: Dashboard/Reports ไม่มี horizontal page overflow; เพิ่ม focus-visible และ reduced-motion fallback.
+
+### ยังไม่ได้ทดสอบ
+
+- รายการ responsive/accessibility, network/concurrency และ production readiness ที่ระบุใน release checklist ยังไม่ถือว่าผ่านจริง; ไม่มี deployment หรือการเปลี่ยน production database.
+- Sales List/Dashboard/Reports ยังเป็นงานขั้นต่อไป และไม่มีการ deploy หรือเปลี่ยน production database.
+
+### การปิดรอบตรวจ local — 22 กันยายน 2026
+
+- เติม Farm List ให้แสดงยอดขายเดือนปัจจุบันต่อ Farm ผ่าน `sales_summary` (RLS เป็นตัวจำกัดแถว) โดยไม่รวมยอดจากรายการที่ถูกแบ่งหน้า
+- ปฏิทินภาษาไทยใช้ปุ่มวันพร้อมชื่อวันที่, Arrow Left/Right/Up/Down เพื่อเลื่อนวัน และ Escape เพื่อปิด/คืน focus ไปยัง input; ยังคงเก็บ Gregorian ISO และแสดง พ.ศ.
+- รัน `supabase/tests/verification.sql` และ `supabase/tests/analytics.sql` บน Supabase local อีกครั้งแบบ `ROLLBACK` สำเร็จ และ `supabase db lint --local` รายงาน `No schema errors found`.
+- รัน `npm.cmd test` (4/4), `npm.cmd run typecheck`, `npm.cmd run build` และ `git diff --check` สำเร็จหลังแก้ไขครั้งสุดท้าย.
+- ตรวจผ่าน browser local: Dashboard ไม่มี page overflow ที่ 390/768/1024/1920px; Farm, Sales, Create Sale และ Reports ไม่มี page overflow ที่ 390/1440px. การตรวจนี้เป็นการวัด scroll width ไม่ใช่การรับรอง screen reader หรือ visual-review ทุก state.
+- ไม่มี deployment และไม่มีการเปลี่ยน production database; เงื่อนไขก่อนใช้งานจริงคงอยู่ใน `docs/RELEASE-CHECKLIST.md`.
+- Audit รอบสุดท้ายแก้การเปิด Edit UI ให้ ADMIN/EDITOR เท่านั้น; VIEWER ที่พิมพ์ URL Edit โดยตรงจะเห็นข้อความอ่านอย่างเดียวและไม่มีฟอร์ม โดย RPC/RLS ยังคงเป็นตัวบังคับสิทธิ์จริง.
+- Create/Edit refetch แถวด้วย UUID/ID หลังเกิด network error ที่ไม่ทราบผล แล้วเปรียบเทียบ date/decimal/version ก่อนแสดง success; หากยืนยันไม่ได้จะเก็บ draft และไม่แสดง success.
+- Sales List รองรับ หน้าแรก/ก่อนหน้า/ถัดไป พร้อมหมายเลขหน้าโดยคง keyset cursor; validation ของ Create/Edit ย้าย focus ไปช่องแรกที่ผิด และแก้ปฏิทินวันแรกของเดือนให้ไม่เลื่อนไปเดือนก่อนจาก timezone offset.
+- ผลตรวจสุดท้าย: database verification และ analytics rollback ผ่าน, DB lint ผ่าน, `npm.cmd audit` ทั้ง production/all dependencies พบ 0 vulnerabilities, `npm.cmd test` ผ่าน 7/7, typecheck/build/diff-check ผ่าน.
