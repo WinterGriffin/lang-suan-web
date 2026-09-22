@@ -1,6 +1,87 @@
 "use client";
-import "./login.css";
-import { useState } from "react";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-export default function Login() { const router=useRouter(); const [error,setError]=useState(""); const [busy,setBusy]=useState(false); async function login(data:FormData){setBusy(true);setError("");const s=createClient();const {data:user,error:e}=await s.auth.signInWithPassword({email:String(data.get("email")),password:String(data.get("password"))});if(e||!user.user){setError("เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจอีเมลและรหัสผ่าน");setBusy(false);return}const {error:p}=await s.rpc("ensure_profile",{p_display_name:String(data.get("name"))});if(p){await s.auth.signOut();setError("ตั้งค่าโปรไฟล์ไม่สำเร็จ");setBusy(false);return}router.replace("/");router.refresh()} return <main className="login-page"><section className="login-card"><p>LANG SUAN / MVP 1.0</p><h1>เข้าสู่ระบบหลังสวน</h1><form action={login}><label>ชื่อที่แสดง<input name="name" defaultValue="ผู้ใช้หลังสวน" required /></label><label>อีเมล<input name="email" type="email" required /></label><label>รหัสผ่าน<input name="password" type="password" required /></label>{error&&<p className="form-error" role="alert">{error}</p>}<button className="button primary" disabled={busy}>{busy?"กำลังเข้าสู่ระบบ…":"เข้าสู่ระบบ"}</button></form></section></main> }
+import "./login.css";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const status = new URLSearchParams(window.location.search).get("status");
+    if (status === "confirmed") setMessage("ยืนยันอีเมลสำเร็จแล้ว กรุณาเข้าสู่ระบบ");
+    if (status === "confirmation-error") setError("ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือหมดอายุ กรุณาลงทะเบียนใหม่หรือตรวจอีเมลฉบับล่าสุด");
+  }, []);
+
+  async function login(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    setMessage("");
+
+    const form = new FormData(event.currentTarget);
+    const supabase = createClient();
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
+      email: String(form.get("email")).trim(),
+      password: String(form.get("password")),
+    });
+
+    if (authError || !data.user) {
+      setError(authError?.code === "email_not_confirmed"
+        ? "ยังไม่ได้ยืนยันอีเมล กรุณาเปิดลิงก์ยืนยันในอีเมลก่อนเข้าสู่ระบบ"
+        : "เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจอีเมลและรหัสผ่าน");
+      setBusy(false);
+      return;
+    }
+    if (!data.user.email_confirmed_at) {
+      await supabase.auth.signOut();
+      setError("ยังไม่ได้ยืนยันอีเมล กรุณาเปิดลิงก์ยืนยันในอีเมลก่อนเข้าสู่ระบบ");
+      setBusy(false);
+      return;
+    }
+
+    const { data: profile, error: profileReadError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (!profile && !profileReadError) {
+      const displayName = typeof data.user.user_metadata.display_name === "string"
+        ? data.user.user_metadata.display_name.trim()
+        : "";
+      const { error: profileError } = displayName
+        ? await supabase.rpc("ensure_profile", { p_display_name: displayName })
+        : { error: new Error("missing display name") };
+      if (profileError) {
+        await supabase.auth.signOut();
+        setError("ตั้งค่าโปรไฟล์ไม่สำเร็จ กรุณาติดต่อผู้ดูแลระบบ");
+        setBusy(false);
+        return;
+      }
+    }
+
+    router.replace("/");
+    router.refresh();
+  }
+
+  return <main className="login-page">
+    <section className="login-card">
+      <p>LANG SUAN / MVP 1.0</p>
+      <h1>เข้าสู่ระบบหลังสวน</h1>
+      <form onSubmit={login}>
+        <label>อีเมล<input name="email" type="email" autoComplete="email" required /></label>
+        <label>รหัสผ่าน<input name="password" type="password" autoComplete="current-password" required /></label>
+        {message && <p className="form-success" role="status">{message}</p>}
+        {error && <p className="form-error" role="alert">{error}</p>}
+        <button className="button primary" disabled={busy}>{busy ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}</button>
+      </form>
+      <p className="auth-switch">ยังไม่มีบัญชี? <Link href="/register">ลงทะเบียน</Link></p>
+    </section>
+  </main>;
+}

@@ -11,6 +11,10 @@ const createFarm = readFileSync("app/farms/new/page.tsx", "utf8");
 const thaiMonth = readFileSync("app/components/thai-month-input.tsx", "utf8");
 const dashboard = readFileSync("app/page.tsx", "utf8");
 const salesListPage = readFileSync("app/sales/page.tsx", "utf8");
+const loginPage = readFileSync("app/login/page.tsx", "utf8");
+const registerPage = readFileSync("app/register/page.tsx", "utf8");
+const confirmationRoute = readFileSync("app/auth/confirm/route.ts", "utf8");
+const authConfig = readFileSync("supabase/config.toml", "utf8");
 
 test("sale retry paths confirm server state before reporting success", () => {
   assert.match(createSale, /eq\("id", requestId\.current\)\.maybeSingle/);
@@ -46,4 +50,19 @@ test("dashboard and sales list use the shared Thai Buddhist month picker", () =>
   assert.match(thaiMonth, /selected\.year \+ 543/);
   assert.match(thaiMonth, /timeZone: "Asia\/Bangkok"/);
   for (const key of ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Escape"]) assert.match(thaiMonth, new RegExp(key));
+});
+
+test("registration requires email confirmation and login no longer asks for display name", () => {
+  assert.match(registerPage, /auth\.signUp/);
+  assert.match(registerPage, /const formElement = event\.currentTarget/);
+  assert.match(registerPage, /formElement\.reset\(\)/);
+  assert.doesNotMatch(registerPage, /event\.currentTarget\.reset\(\)/);
+  assert.match(registerPage, /data: \{ display_name: displayName \}/);
+  assert.match(registerPage, /data\.session/);
+  assert.match(confirmationRoute, /auth\.verifyOtp/);
+  assert.match(confirmationRoute, /rpc\("ensure_profile"/);
+  assert.match(confirmationRoute, /auth\.signOut/);
+  assert.match(loginPage, /email_not_confirmed/);
+  assert.doesNotMatch(loginPage, /name="name"/);
+  assert.match(authConfig, /enable_confirmations = true/);
 });

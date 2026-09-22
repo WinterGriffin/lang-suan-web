@@ -12,7 +12,7 @@ Legend: NN = NOT NULL; PK = primary key; FK = foreign key. All foreign keys use 
 
 ### auth.users — Supabase managed
 
-Only `id uuid PK` is referenced. Passwords, tokens, provider data and email remain under Supabase Auth. Do not copy credentials into profiles or Audit. Application code must not alter Auth tables directly. Call `ensure_profile` after a valid sign-in to provision the self-owned profile.
+Only `id uuid PK` is referenced. Passwords, tokens, provider data and email remain under Supabase Auth. Do not copy credentials into profiles or Audit. Application code must not alter Auth tables directly. Registration stores the validated display name in Auth user metadata; after email-token verification, the confirmation handler calls `ensure_profile` to provision the self-owned profile. Login may call the same idempotent RPC for a confirmed legacy account whose profile is still missing. User-editable metadata is never a permission source.
 
 ### public.profiles
 

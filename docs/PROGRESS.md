@@ -188,3 +188,13 @@
 - รองรับเลือก 12 เดือน, เปลี่ยนปี, กลับเดือนปัจจุบันตาม Asia/Bangkok, Arrow keys, Escape และคืน focus ไปปุ่มเปิดปฏิทิน.
 - ทดสอบ browser local ที่ 390px: Dashboard แสดงเดือนทั้ง 12 เป็นภาษาไทย, เลือกสิงหาคม 2569 แล้ว query state เปลี่ยนและ dialog ปิด; Sales List ไม่มี native month input และแสดงกันยายน 2569. ArrowLeft เลื่อน focus/ค่าไปสิงหาคม, Escape ปิด dialog และคืน focus; ทั้งสองหน้าไม่มี horizontal overflow.
 - ผลตรวจหลัง amendment: contract tests ผ่าน 9/9, typecheck และ production build ผ่าน.
+
+## Scope amendment 1.0.4: Registration and email confirmation — 22 กันยายน 2026
+
+- ผู้ใช้อนุมัติหน้า `/register` ที่รับชื่อที่แสดง อีเมล และรหัสผ่าน; หน้า `/login` เหลือเฉพาะอีเมลและรหัสผ่าน.
+- เปิด Supabase Auth email confirmation ใน local config และเพิ่ม SSR `/auth/confirm`; ชื่อที่แสดงถูกเก็บใน Auth metadata แล้วส่งเข้า `ensure_profile` หลังยืนยัน token สำเร็จ.
+- Confirmation ออกจาก session ชั่วคราวและกลับ Login พร้อมสถานะสำเร็จ ผู้ใช้ที่ยังไม่ยืนยันถูกปฏิเสธทั้งโดย GoTrue และ guard ใน UI.
+- Local confirmation email อยู่ใน Inbucket ที่ `http://localhost:54324`; production ต้องตั้ง Auth site URL, redirect allow-list, confirmation template และ SMTP แยกต่างหาก.
+- รีสตาร์ต Supabase local โดยคงข้อมูลเดิม แล้วทดสอบจริงครบ: signup คืน user โดยไม่มี session/ยังไม่ confirmed, password login ก่อนยืนยันถูกปฏิเสธด้วย `email_not_confirmed`, อีเมลเข้า Inbucket, confirmation token สร้าง profile จาก metadata, และ password login หลังยืนยันสำเร็จ.
+- ลบ Auth user/profile fixture ออกจาก local database หลังทดสอบ; อีเมลจำลองอาจยังอยู่ใน local Inbucket ซึ่งไม่ส่งออกภายนอก. `npm.cmd test` ผ่าน 10/10, typecheck, production build และ route smoke test ผ่าน; build มี `/register` และ `/auth/confirm`.
+- แก้ runtime error หลัง signup สำเร็จ: เก็บ form element ก่อน `await` แล้วจึง reset ผ่าน reference ที่คงอยู่ พร้อม regression contract ป้องกันการกลับไปใช้ `event.currentTarget.reset()` หลัง async.

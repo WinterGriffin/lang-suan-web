@@ -22,6 +22,7 @@
 - Create Farm browser flow ผ่านบน Supabase local รวม redirect, success state และเลือก Farm ใหม่; fixture ถูกลบหลังทดสอบ
 - Create Farm ตรวจ responsive ที่ 390px ไม่มี page overflow; contract tests หลัง scope amendment ผ่าน 8/8 และ production build รวม `/farms/new` สำเร็จ
 - Dashboard/Sales ใช้ปฏิทินเดือนไทยร่วมกัน: browser 390px แสดง 12 เดือน/ปี พ.ศ., เลือกเดือนได้, Arrow keys/Escape/focus recovery ผ่าน และไม่มี native English month input; contract tests ล่าสุดผ่าน 9/9
+- Scope 1.0.4 Registration ผ่าน integration test บน Supabase local: signup ไม่มี session, unconfirmed login ถูกปฏิเสธ, Inbucket confirmation สร้าง profile และ confirmed login สำเร็จ; Login เหลือเฉพาะ email/password และ contract tests ผ่าน 10/10
 
 ## ยังไม่ได้ทดสอบ
 
@@ -33,5 +34,6 @@
 ## ต้องแก้ก่อนใช้งานจริง
 
 - ตั้งค่า production Auth domain, redirect URLs, HTTPS, rate limiting, monitoring, backup/restore และ migration pipeline
+- เปิด Confirm Email และตั้ง confirmation template/SMTP ที่เชื่อถือได้ใน hosted Supabase; local Inbucket ใช้สำหรับ development เท่านั้น
 - ใช้ production Supabase project ที่แยกจาก local; ห้ามใช้ fixtures, local test users หรือ `.env.local`
 - ทำ accessibility/responsive acceptance และ security/dependency review รอบสุดท้าย

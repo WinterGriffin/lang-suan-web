@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4 — 2026-09-22
+
+- User explicitly approved expanding scope with self-registration using display name, email, and password.
+- Supabase email confirmation is mandatory before password sign-in; the confirmation route creates the application profile from authenticated user metadata and returns the user to Login.
+- Login no longer asks for a display name and contains only email and password fields.
+- Fixed registration success handling by retaining the form element before the asynchronous signup request, preventing a null `currentTarget.reset()` runtime error.
+
 ## 1.0.3 — 2026-09-22
 
 - Dashboard and Sales List month filters now use the shared Thai month calendar instead of the device-native English month input.
