@@ -1,0 +1,28 @@
+{
+  "name": "lang-suan",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm exec -- next dev",
+    "build": "npm exec -- next build",
+    "start": "npm exec -- next start",
+    "typecheck": "npm exec -- tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "test:database-contract": "node --test tests/database-contract.test.mjs"
+  },
+  "dependencies": {
+    "next": "16.3.5",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "supabase": "^2.117.0",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

@@ -6,3 +6,14 @@ desktop.ini
 # Logs and temporary files
 *.log
 *.tmp
+
+# Next.js and Node.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Local environment files and Supabase CLI state
+.env.local
+.env*.local
+supabase/.temp/
