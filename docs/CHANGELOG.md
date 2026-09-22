@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.3 — 2026-09-22
+
+- Dashboard and Sales List month filters now use the shared Thai month calendar instead of the device-native English month input.
+- Month labels use full Thai month names and Buddhist years while query values remain Gregorian `YYYY-MM`; keyboard arrows, Escape, year navigation, and a Bangkok-current-month action are supported.
+
+## 1.0.2 — 2026-09-22
+
+- User explicitly approved expanding the MVP screen scope with authenticated Farm creation.
+- Added FR-13 and D-13: `/farms/new` collects Farm name, `produce_name`, and `default_share_input`; `create_farm` creates the Farm and assigns its creator as the first ADMIN in one transaction.
+- Member-management UI remains outside MVP scope. Existing per-Farm RLS/RPC authorization is unchanged.
+
 ## 1.0.1 — 2026-09-19
 
 - Application renamed by user request to หลังสวน (Lang Suan); technical folder paths retained for link compatibility.

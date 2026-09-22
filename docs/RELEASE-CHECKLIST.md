@@ -17,7 +17,11 @@
 - VIEWER ไม่เห็น Edit action และเปิด Edit URL ตรงแล้วไม่มีฟอร์ม; ADMIN/EDITOR ยังใช้งานผ่าน `save_sale` โดยสิทธิ์จริงบังคับซ้ำที่ RPC/RLS
 - Create/Edit ตรวจผลหลัง network response ไม่ชัดเจนด้วยการ refetch และเทียบ UUID/ID, version และ decimal fields ก่อนแสดง success; draft ยังคงอยู่เมื่อยืนยันไม่ได้
 - Sales List มี keyset หน้าแรก/ก่อนหน้า/ถัดไปและหมายเลขหน้า; aggregate ยังคงแยกจาก page rows
-- `npm.cmd audit --omit=dev` และ `npm.cmd audit` รายงาน 0 vulnerabilities; ชุด contract test รอบสุดท้ายผ่าน 7/7
+- `npm.cmd audit --omit=dev` และ `npm.cmd audit` รายงาน 0 vulnerabilities; ชุด contract testก่อน scope amendment ผ่าน 7/7
+- Scope 1.0.2 เพิ่ม Create Farm ผ่าน `create_farm`; creator เป็น ADMIN คนแรกโดย transaction เดียว และ UI ไม่ใช้ direct table insert
+- Create Farm browser flow ผ่านบน Supabase local รวม redirect, success state และเลือก Farm ใหม่; fixture ถูกลบหลังทดสอบ
+- Create Farm ตรวจ responsive ที่ 390px ไม่มี page overflow; contract tests หลัง scope amendment ผ่าน 8/8 และ production build รวม `/farms/new` สำเร็จ
+- Dashboard/Sales ใช้ปฏิทินเดือนไทยร่วมกัน: browser 390px แสดง 12 เดือน/ปี พ.ศ., เลือกเดือนได้, Arrow keys/Escape/focus recovery ผ่าน และไม่มี native English month input; contract tests ล่าสุดผ่าน 9/9
 
 ## ยังไม่ได้ทดสอบ
 

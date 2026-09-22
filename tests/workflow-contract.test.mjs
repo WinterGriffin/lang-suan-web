@@ -7,6 +7,10 @@ const editSale = readFileSync("app/sales/[id]/edit/page.tsx", "utf8");
 const saleDetail = readFileSync("app/sales/[id]/page.tsx", "utf8");
 const salesList = readFileSync("app/sales/page.tsx", "utf8");
 const calendar = readFileSync("app/components/thai-date-input.tsx", "utf8");
+const createFarm = readFileSync("app/farms/new/page.tsx", "utf8");
+const thaiMonth = readFileSync("app/components/thai-month-input.tsx", "utf8");
+const dashboard = readFileSync("app/page.tsx", "utf8");
+const salesListPage = readFileSync("app/sales/page.tsx", "utf8");
 
 test("sale retry paths confirm server state before reporting success", () => {
   assert.match(createSale, /eq\("id", requestId\.current\)\.maybeSingle/);
@@ -25,4 +29,21 @@ test("sales pagination and calendar keyboard contracts remain wired", () => {
   assert.match(salesList, /previousPage/);
   assert.match(salesList, /หน้า \{history\.length \+ 1\}/);
   for (const key of ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Escape"]) assert.match(calendar, new RegExp(key));
+});
+
+test("farm creation uses the authorized RPC and confirms uncertain responses", () => {
+  assert.match(createFarm, /rpc\("create_farm"/);
+  assert.match(createFarm, /p_id: farmId\.current/);
+  assert.match(createFarm, /from\("farms"\).*eq\("id", farmId\.current\)\.maybeSingle/);
+  assert.doesNotMatch(createFarm, /from\("farms"\)\.insert/);
+});
+
+test("dashboard and sales list use the shared Thai Buddhist month picker", () => {
+  assert.match(dashboard, /<ThaiMonthInput value=\{month\} onChange=\{setMonth\}/);
+  assert.match(salesListPage, /<ThaiMonthInput value=\{month\} onChange=\{setMonth\}/);
+  assert.doesNotMatch(dashboard, /type="month"/);
+  assert.doesNotMatch(salesListPage, /type="month"/);
+  assert.match(thaiMonth, /selected\.year \+ 543/);
+  assert.match(thaiMonth, /timeZone: "Asia\/Bangkok"/);
+  for (const key of ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Escape"]) assert.match(thaiMonth, new RegExp(key));
 });

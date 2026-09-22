@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "../components/app-shell";
 import { createClient } from "@/lib/supabase/client";
@@ -81,7 +82,11 @@ export default function FarmsPage() {
       setSales([]);
       setStatus("ยังไม่มีฟาร์มที่คุณมีสิทธิ์");
     } else {
-      chooseFarm(nextFarms[0]);
+      const createdId = new URLSearchParams(window.location.search).get("created");
+      chooseFarm(nextFarms.find((farm) => farm.id === createdId) ?? nextFarms[0]);
+      if (createdId) {
+        setStatus("สร้างฟาร์มใหม่แล้ว คุณเป็น ADMIN ของฟาร์มนี้");
+      }
     }
     setLoading(false);
   }, [chooseFarm]);
@@ -141,9 +146,9 @@ export default function FarmsPage() {
   const canEdit = role === "ADMIN";
 
   return <AppShell active="farms" title="ฟาร์ม">
-    <div className="page-intro"><p>ชื่อฟาร์ม ผลผลิต สถานะ และด้านที่กรอกส่วนแบ่ง</p><button className="profile-button" type="button" onClick={() => void loadFarms()} disabled={loading}>โหลดใหม่</button></div>
+    <div className="page-intro"><p>ชื่อฟาร์ม ผลผลิต สถานะ และด้านที่กรอกส่วนแบ่ง</p><div className="farm-page-actions"><button className="profile-button" type="button" onClick={() => void loadFarms()} disabled={loading}>โหลดใหม่</button><Link className="button primary" href="/farms/new">+ สร้างฟาร์ม</Link></div></div>
     {status && <p className={status.includes("สำเร็จ") || status.includes("แล้ว") ? "form-success" : "form-message"} role="status">{status}</p>}
-    {loading ? <section className="empty-state"><p>กำลังโหลดข้อมูล…</p></section> : farms.length === 0 ? <section className="empty-state"><h2>ยังไม่มีฟาร์มที่คุณมีสิทธิ์</h2><p>ติดต่อผู้ดูแลฟาร์มหรือดำเนินการ onboarding ก่อนเริ่มบันทึกการขาย</p></section> : <div className="farm-layout">
+    {loading ? <section className="empty-state"><p>กำลังโหลดข้อมูล…</p></section> : farms.length === 0 ? <section className="empty-state"><h2>ยังไม่มีฟาร์มที่คุณมีสิทธิ์</h2><p>สร้างฟาร์มแรกเพื่อเริ่มบันทึกการขาย หรือให้ผู้ดูแลเพิ่มสิทธิ์คุณในฟาร์มเดิม</p><Link className="button primary" href="/farms/new">สร้างฟาร์มแรก</Link></section> : <div className="farm-layout">
       <section className="farm-list" aria-label="รายการฟาร์ม">
         {farms.map((farm) => <button type="button" key={farm.id} className={farm.id === selected?.id ? "farm-card selected" : "farm-card"} onClick={() => chooseFarm(farm)}>
           <strong>{farm.name}</strong><span>{farm.produce_name}</span><small>{farm.is_active ? "ใช้งานอยู่" : "ปิดใช้งาน"} · {farm.default_share_input} · {roles[farm.id]}</small><small>ยอดเดือนนี้ {monthTotals[farm.id] ?? "0.00"} บาท</small>

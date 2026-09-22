@@ -1,6 +1,6 @@
 # หลังสวน (Lang Suan) MVP 1.0 — Product specification
 
-Version: 1.0 • Baseline date: 19 September 2026 • Locale: th-TH • Time zone: Asia/Bangkok • Currency: THB • Unit: kg
+Version: 1.0.3 • Baseline date: 19 September 2026 • Amendment date: 22 September 2026 • Locale: th-TH • Time zone: Asia/Bangkok • Currency: THB • Unit: kg
 
 ## 1. Authority and provenance
 
@@ -32,6 +32,7 @@ Source conversation: วางแผนระบบขายสินค้า�
 | FR-10 | Thai first, mobile first, responsive, minimum entry | Desktop sidebar; Mobile bottom navigation and single-column form |
 | FR-11 | Requested screen coverage | Dashboard, Sales List, Create/Edit, Sale Detail, Farm List/Detail, Reports |
 | FR-12 | Supabase / PostgreSQL / RLS / Audit Log handoff | SQL migration, dictionary, permission matrix, test plan |
+| FR-13 | Authenticated users can create a Farm | Create Farm screen calls `create_farm`; creator becomes first ADMIN atomically |
 
 ## 3. Implementation decisions added in v1.0
 
@@ -51,6 +52,8 @@ These decisions make the frozen scope implementable. They are **design decisions
 | D-10 | Inactive Farm excluded only from Create; historical rows and editing remain accessible | Preserve history and correction ability |
 | D-11 | One persistent unit kg and one currency THB for MVP | No redundant unit/currency input or conversion |
 | D-12 | Explicit UUID create retry key and integer versions | Prevent duplicate saves and stale overwrites |
+| D-13 | Create Farm asks only for name, `produce_name`, and `default_share_input`; new Farms start active and the creator is ADMIN | Minimum onboarding without adding member management or a Product model |
+| D-14 | Dashboard and Sales List month filters use a custom Thai month calendar with full Thai month names and Buddhist years; internal values remain Gregorian `YYYY-MM` | Consistent Thai date UX across overview, list, and sale entry |
 
 No fertilizer, fields, inventory, costs/profit, adjustments, discounts, payments, Customer or Product catalog. Authentication is an implementation dependency; login/reset screens and user administration UI are outside the requested prototype screen set. Native iOS/Android and offline capture are future phases; responsive web is v1.
 
@@ -107,6 +110,7 @@ Rows = permitted farms + selected Farm + `start <= sale_date < end`. Every aggre
 | Sale Detail | Total, date, Farm, produce snapshot, kg, price, both shares; Edit; history | Main details and Audit side by side | Stacked; history below details |
 | Farm List | Name, produce, active status, current-month total, share input side, Detail | 3 cards; 2 on tablet | One card per row |
 | Farm Detail | Name, produce, input side, active status; Save for ADMIN; latest 5 sales | Settings and compact sale cards in two columns | Stacked; clear notice before rule changes |
+| Create Farm | Name, produce, default share input; creator becomes ADMIN | Form and confirmation summary | Single-column form with reachable Save |
 | Reports | Monthly/year/Farm tabs; Farm/year/metric selectors; comparisons; table | Full year chart and data table | Reduced chart density with full 12-month table available |
 
 All pages have Thai labels. Show farm produce directly under the picker, never a Product picker. The Prototype uses a simulated ADMIN so every requested editing path is reviewable. Production hides forbidden controls based on role **and** enforces permissions server-side.
@@ -119,7 +123,7 @@ Save: validate all fields → focus first invalid → compute preview → disabl
 
 Editing: send expected_version read at open. On conflict, preserve draft; offer “โหลดข้อมูลล่าสุด” (with discard confirmation) or cancel. Do not automatically overwrite. If an update times out, refetch and compare version/values before deciding whether another submission is safe. Creating uses a stable request UUID; retry unchanged creation using the same UUID.
 
-Farm settings: confirmation when share input side changes, explaining it affects only new sales. Inactivation keeps historical reports and edits, hides Farm from Create. Administration is per Farm. Farm creation/member setup occurs through secure onboarding/RPC; prototype scope covers List/Detail only.
+Farm settings: confirmation when share input side changes, explaining it affects only new sales. Inactivation keeps historical reports and edits, hides Farm from Create. Administration is per Farm. Authenticated Farm creation uses the secure `create_farm` RPC and makes the creator the first ADMIN atomically; member setup remains outside the MVP UI.
 
 ## 8. Essential states and error copy
 

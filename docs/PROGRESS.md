@@ -173,3 +173,18 @@
 - Create/Edit refetch แถวด้วย UUID/ID หลังเกิด network error ที่ไม่ทราบผล แล้วเปรียบเทียบ date/decimal/version ก่อนแสดง success; หากยืนยันไม่ได้จะเก็บ draft และไม่แสดง success.
 - Sales List รองรับ หน้าแรก/ก่อนหน้า/ถัดไป พร้อมหมายเลขหน้าโดยคง keyset cursor; validation ของ Create/Edit ย้าย focus ไปช่องแรกที่ผิด และแก้ปฏิทินวันแรกของเดือนให้ไม่เลื่อนไปเดือนก่อนจาก timezone offset.
 - ผลตรวจสุดท้าย: database verification และ analytics rollback ผ่าน, DB lint ผ่าน, `npm.cmd audit` ทั้ง production/all dependencies พบ 0 vulnerabilities, `npm.cmd test` ผ่าน 7/7, typecheck/build/diff-check ผ่าน.
+
+## Scope amendment 1.0.2: Create Farm — 22 กันยายน 2026
+
+- ผู้ใช้อนุมัติขยายขอบเขตให้มีหน้าสร้างฟาร์ม จึงเพิ่ม `/farms/new` และปุ่มสร้างจาก Farm List/empty state.
+- ฟอร์มรับเฉพาะชื่อฟาร์ม, `produce_name` และด้านส่วนแบ่ง OWNER/WORKER; เรียก `create_farm` RPC ด้วย UUID คงที่ และตรวจแถวจาก server เมื่อผลเครือข่ายไม่ชัดเจนก่อนแสดง success.
+- ผู้สร้างเป็น ADMIN คนแรกโดย transaction ของฐานข้อมูล; ไม่เพิ่มหน้าจัดการสมาชิก, Customer, Product หรือ `sale_items`.
+- ทดสอบผ่าน browser local จริง: กรอกชื่อ/ผลผลิต, บันทึก, redirect กลับ `/farms?created=...`, แสดงข้อความสำเร็จ และเลือก Farm ที่เพิ่งสร้าง; ลบ fixture ทดสอบสองรายการและ Audit ที่เกี่ยวข้องออกจาก local database หลังตรวจเสร็จ.
+- ตรวจ `/farms/new` ที่ viewport 390px ไม่มี horizontal page overflow และปุ่มสร้างยังอยู่ในหน้า; contract tests ผ่าน 8/8, typecheck และ production build ผ่าน โดย build มี route `/farms/new`.
+
+## UI amendment 1.0.3: Thai month calendar — 22 กันยายน 2026
+
+- เปลี่ยนตัวกรองเดือนบน Dashboard และ Sales List จาก native `type="month"` เป็น component ร่วมที่แสดงชื่อเดือนภาษาไทยเต็มและปี พ.ศ.; ค่า query ภายในยังเป็น Gregorian `YYYY-MM`.
+- รองรับเลือก 12 เดือน, เปลี่ยนปี, กลับเดือนปัจจุบันตาม Asia/Bangkok, Arrow keys, Escape และคืน focus ไปปุ่มเปิดปฏิทิน.
+- ทดสอบ browser local ที่ 390px: Dashboard แสดงเดือนทั้ง 12 เป็นภาษาไทย, เลือกสิงหาคม 2569 แล้ว query state เปลี่ยนและ dialog ปิด; Sales List ไม่มี native month input และแสดงกันยายน 2569. ArrowLeft เลื่อน focus/ค่าไปสิงหาคม, Escape ปิด dialog และคืน focus; ทั้งสองหน้าไม่มี horizontal overflow.
+- ผลตรวจหลัง amendment: contract tests ผ่าน 9/9, typecheck และ production build ผ่าน.

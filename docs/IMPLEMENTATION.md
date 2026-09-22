@@ -61,6 +61,7 @@ A TypeScript React web implementation with Supabase Auth and PostgreSQL fits the
 | T26 | 320px device, keyboard and long Thai Farm names | No horizontal page overflow or hidden Save; labelled controls |
 | T27 | Snapshot produce renamed, mixed Farm produce comparison | History uses snapshot; cross-produce average caveat visible |
 | T28 | Audit insert failure | Business write rolls back in same transaction |
+| T29 | Authenticated user creates a Farm | One active Farm is created; creator is its first ADMIN; Audit records Farm and membership creation |
 
 `verification.sql` is a rollback-only database harness for a disposable project. It does not replace real Auth/JWT and concurrency integration tests. It inserts fixture identities as migration owner to test RLS policies, then switches role and request claims. Never run fixture SQL on production.
 
