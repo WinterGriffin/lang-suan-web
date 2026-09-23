@@ -17,3 +17,6 @@ out/
 .env.local
 .env*.local
 supabase/.temp/
+/dist/
+.vinext/
+.wrangler/
