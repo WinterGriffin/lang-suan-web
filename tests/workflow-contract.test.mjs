@@ -18,6 +18,7 @@ const authConfig = readFileSync("supabase/config.toml", "utf8");
 const proxy = readFileSync("proxy.ts", "utf8");
 const browserSupabaseClient = readFileSync("lib/supabase/client.ts", "utf8");
 const serverSupabaseClient = readFileSync("lib/supabase/server.ts", "utf8");
+const authAppUrl = readFileSync("lib/auth/app-url.ts", "utf8");
 
 test("sale retry paths confirm server state before reporting success", () => {
   assert.match(createSale, /eq\("id", requestId\.current\)\.maybeSingle/);
@@ -65,7 +66,9 @@ test("registration requires email confirmation and login no longer asks for disp
   assert.match(confirmationRoute, /auth\.verifyOtp/);
   assert.match(confirmationRoute, /if \(!error && data\.user\)/);
   assert.doesNotMatch(confirmationRoute, /data\.user\?\.email_confirmed_at/);
-  assert.match(confirmationRoute, /request\.headers\.get\("host"\)/);
+  assert.match(confirmationRoute, /appUrl\("\/login"\)/);
+  assert.doesNotMatch(confirmationRoute, /request\.headers\.get\("host"\)/);
+  assert.match(authAppUrl, /process\.env\.APP_URL/);
   assert.match(confirmationRoute, /rpc\("ensure_profile"/);
   assert.match(confirmationRoute, /auth\.signOut/);
   assert.match(loginPage, /email_not_confirmed/);

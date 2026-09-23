@@ -10,13 +10,21 @@ application profile data.
 
 1. In **Authentication → Auth Providers**, create a Custom OAuth/OIDC provider
    with identifier `custom:line`.
-2. Choose manual OAuth2 configuration unless the configured LINE channel supplies
-   a supported OIDC discovery endpoint. Enter the LINE Channel ID and Channel
-   Secret in Supabase only.
+2. Choose manual OAuth2. Configure `https://access.line.me/oauth2/v2.1/authorize`
+   as the authorization endpoint, `https://api.line.me/oauth2/v2.1/token` as the
+   token endpoint, and `https://api.line.me/oauth2/v2.1/userinfo` as the userinfo
+   endpoint. Enable PKCE and request `openid profile`. Enter the LINE Channel ID
+   and Channel Secret in Supabase only.
 3. Copy the callback URL displayed by Supabase and register that exact URL in the
    LINE Developers Console for the LINE Login channel.
-4. Allow the deployed `https://<app-host>/auth/callback` in Supabase Auth URL
-   configuration. It is the post-Supabase redirect consumed by this app.
+4. In **Authentication â†’ URL Configuration**, set the Site URL to the canonical
+   application origin and add the exact post-login callback URL to Redirect URLs.
+   For this Docker-local deployment, these are
+   `http://localhost:3000` and `http://localhost:3000/auth/callback`.
+   `http://127.0.0.1:3000/auth/callback` is also allowed for direct loopback
+   testing. Do not use `http://0.0.0.0:3000`: it is a bind address, not a browser
+   URL. If the exact callback is absent, Supabase falls back to its Site URL after
+   completing the external-provider flow.
 5. Request only `openid profile`. LINE email permission is optional and requires
    LINE approval; without a verified shared email, users may need future manual
    identity linking rather than automatic linking.
@@ -42,3 +50,15 @@ Secret in `.env.local`, `compose.yaml`, or browser variables.
 
 There are no new application environment variables. LINE credentials belong in the
 Supabase Custom Provider configuration, not in Next.js.
+
+Set `APP_URL=http://localhost:3000` for Docker-local deployment. Route Handlers
+use this browser-facing URL for the final callback redirect instead of the
+container listen address. For a real hosted deployment, set it to that deployment's
+HTTPS origin and register the matching `/auth/callback` URL in Supabase.
+
+For Docker-local testing, open `http://localhost:3000`, not
+`http://0.0.0.0:3000`. `0.0.0.0` is a Docker listen address, and browsers reject
+it before this application can load or redirect it. The hosted provider uses
+manual OAuth2 and LINE's userinfo endpoint rather than Custom OIDC discovery to
+avoid a known LINE Web Login / generic OIDC-provider interoperability issue
+during external-profile retrieval.

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { appUrl } from "@/lib/auth/app-url";
 import { createClient } from "@/lib/supabase/server";
 
 function displayNameFromMetadata(metadata: Record<string, unknown>) {
@@ -11,16 +12,16 @@ function displayNameFromMetadata(metadata: Record<string, unknown>) {
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
-  const redirectTo = new URL("/", request.url);
+  const redirectTo = appUrl("/");
 
   if (!code) {
-    return NextResponse.redirect(new URL("/login?status=oauth-error", request.url));
+    return NextResponse.redirect(appUrl("/login?status=oauth-error"));
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error || !data.user) {
-    return NextResponse.redirect(new URL("/login?status=oauth-error", request.url));
+    return NextResponse.redirect(appUrl("/login?status=oauth-error"));
   }
 
   const { error: profileError } = await supabase.rpc("ensure_profile", {
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
   });
   if (profileError) {
     await supabase.auth.signOut();
-    return NextResponse.redirect(new URL("/login?status=profile-error", request.url));
+    return NextResponse.redirect(appUrl("/login?status=profile-error"));
   }
 
   return NextResponse.redirect(redirectTo);

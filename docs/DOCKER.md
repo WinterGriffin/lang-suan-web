@@ -68,7 +68,9 @@ docker compose ps
 docker compose logs --follow web
 ```
 
-Open `http://localhost:3000`. Stop following logs with `Ctrl+C`; the container
+Open `http://localhost:3000`. The Compose port is intentionally bound to
+`127.0.0.1`, so it is local-only; `0.0.0.0` is a Docker listen address, not a
+browser URL. Stop following logs with `Ctrl+C`; the container
 continues to run in the background.
 
 ## Manual Docker commands
@@ -82,7 +84,7 @@ docker build `
   --tag langsuan-web:local .
 
 docker run --detach --name langsuan-web `
-  --publish 3000:3000 `
+  --publish 127.0.0.1:3000:3000 `
   --env-file .env.local `
   --restart unless-stopped `
   langsuan-web:local
@@ -106,7 +108,7 @@ docker rm --force langsuan-web
 
 # Return to a previously tagged image, if one was retained
 docker rm --force langsuan-web
-docker run --detach --name langsuan-web --publish 3000:3000 --env-file .env.local previous-image:tag
+docker run --detach --name langsuan-web --publish 127.0.0.1:3000:3000 --env-file .env.local previous-image:tag
 ```
 
 ## Related commands

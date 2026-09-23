@@ -1,13 +1,12 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
+import { appUrl } from "@/lib/auth/app-url";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const tokenHash = request.nextUrl.searchParams.get("token_hash");
   const type = request.nextUrl.searchParams.get("type") as EmailOtpType | null;
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? request.nextUrl.host;
-  const protocol = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(/:$/, "");
-  const redirectTo = new URL("/login", `${protocol}://${host}`);
+  const redirectTo = appUrl("/login");
 
   if (tokenHash && type) {
     const supabase = await createClient();

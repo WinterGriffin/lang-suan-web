@@ -8,9 +8,12 @@ services:
     container_name: langsuan-web
     image: langsuan-web:local
     ports:
-      - "3000:3000"
+      # This is a local-only deployment. Do not expose the container on every
+      # host interface, which Docker displays as the non-browsable 0.0.0.0 URL.
+      - "127.0.0.1:3000:3000"
     environment:
       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
       SUPABASE_URL_INTERNAL: ${SUPABASE_URL_INTERNAL}
+      APP_URL: ${APP_URL:-http://localhost:3000}
     restart: unless-stopped

@@ -8,6 +8,24 @@
 - Added a Supabase PKCE OAuth callback and minimal Thai LINE sign-in entry point;
   existing email registration, confirmation, login and shared SSR session cookie
   remain in place. LINE credentials are configured only in Supabase.
+- Configured `custom:line` as manual OAuth2 with LINE's authorization, token and
+  userinfo endpoints, with `localhost` as the Docker-local post-login callback
+  host.
+- Bound the Docker-local web port explicitly to `127.0.0.1:3000`, preventing
+  Docker's `0.0.0.0:3000` listen notation from being mistaken for a browser URL.
+- Added the exact LINE post-login callback URLs to the hosted Supabase Auth
+  Redirect URLs and the tracked local Auth configuration. This prevents Auth from
+  falling back to a stale Site URL after LINE has authenticated the user.
+- Fixed the confirmed Docker callback defect: Route Handlers had built browser
+  redirects from the container request host (`0.0.0.0`). They now use the
+  configured browser-facing `APP_URL`, defaulting to `http://localhost:3000`.
+- Dashboard now distinguishes an empty selected period from a read error and
+  presents the Thai empty-state message with a direct first-sale action.
+- Added a RLS-respecting Dashboard trend fallback that derives daily points from
+  authorized sales rows when an older hosted database has not yet received the
+  `sales_daily_summary` migration.
+- Manually verified the complete LINE Login flow, authenticated Dashboard entry,
+  first-sale empty state, and Dashboard display after recording a sale.
 - Reworked dashboard hierarchy to Total Sales, Owner Share, Worker Share and
   previous-period Total Sales comparison. Existing weight, weighted price and
   sale-count analytics remain available as secondary information.

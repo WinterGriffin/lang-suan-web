@@ -17,6 +17,19 @@ type Sale = Tables<"sales">;
 type Summary = { farm_id: string; total_amount: number; weight_kg: number; sale_count: number; owner_share: number; worker_share: number };
 const blank = { total: 0n, weight: 0n, count: 0n, owner: 0n, worker: 0n };
 
+function dailyPointsFromSales(sales: Pick<Sale, "sale_date" | "total_amount" | "owner_share" | "worker_share">[]): DailyPoint[] {
+  const byDate = new Map<string, DailyPoint>();
+  for (const sale of sales) {
+    const point = byDate.get(sale.sale_date) ?? { sale_date: sale.sale_date, total_amount: 0, owner_share: 0, worker_share: 0, sale_count: 0 };
+    point.total_amount += Number(sale.total_amount ?? 0);
+    point.owner_share += Number(sale.owner_share ?? 0);
+    point.worker_share += Number(sale.worker_share ?? 0);
+    point.sale_count += 1;
+    byDate.set(sale.sale_date, point);
+  }
+  return Array.from(byDate.values()).sort((left, right) => left.sale_date.localeCompare(right.sale_date));
+}
+
 export default function DashboardPage() {
   const [month, setMonth] = useState(bangkokMonth());
   const [farmId, setFarmId] = useState("");
@@ -27,9 +40,11 @@ export default function DashboardPage() {
   const [daily, setDaily] = useState<DailyPoint[]>([]);
   const [latest, setLatest] = useState<Sale[]>([]);
   const [status, setStatus] = useState("กำลังโหลดข้อมูล…");
+  const [isEmpty, setIsEmpty] = useState(false);
 
   const load = useCallback(async () => {
     setStatus("กำลังโหลดข้อมูล…");
+    setIsEmpty(false);
     const client = createClient();
     const now = monthRange(month);
     const before = monthRange(previousMonth(month));
@@ -44,16 +59,30 @@ export default function DashboardPage() {
       client.rpc("sales_daily_summary", { p_start: now.start, p_end: now.end, p_farm_id: farmId || undefined }),
     ]);
     if (farmResult.data) setFarms(farmResult.data);
-    if (nowResult.error || beforeResult.error || salesResult.error || allFarmResult.error || dailyResult.error) {
+    const missingDailySummary = dailyResult.error?.code === "PGRST202";
+    if (nowResult.error || beforeResult.error || salesResult.error || allFarmResult.error || (dailyResult.error && !missingDailySummary)) {
       setStatus("โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่");
       return;
     }
-    setCurrent(totalRows(nowResult.data ?? []));
+    let dailyPoints = dailyResult.data ?? [];
+    if (missingDailySummary) {
+      let dailySalesQuery = client.from("sales").select("sale_date,total_amount,owner_share,worker_share").gte("sale_date", now.start).lt("sale_date", now.end).order("sale_date");
+      if (farmId) dailySalesQuery = dailySalesQuery.eq("farm_id", farmId);
+      const { data: dailySales, error: dailySalesError } = await dailySalesQuery;
+      if (dailySalesError) {
+        setStatus("โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่");
+        return;
+      }
+      dailyPoints = dailyPointsFromSales(dailySales ?? []);
+    }
+    const nextCurrent = totalRows(nowResult.data ?? []);
+    setCurrent(nextCurrent);
     setPrevious(totalRows(beforeResult.data ?? []));
     setFarmSummaries(allFarmResult.data ?? []);
-    setDaily(dailyResult.data ?? []);
+    setDaily(dailyPoints);
     setLatest(salesResult.data ?? []);
     setStatus("");
+    setIsEmpty(nextCurrent.count === 0n);
   }, [farmId, month]);
 
   useEffect(() => { void load(); }, [load]);
@@ -73,7 +102,7 @@ export default function DashboardPage() {
   return <AppShell active="overview" title="ภาพรวม">
     <section className="page-intro"><div><p>ติดตามยอดขายและส่วนแบ่งของฟาร์มในช่วงเวลาที่เลือก</p><span className="period-chip">{todayMonth ? "ยอดสะสมถึงวันนี้ เทียบเดือนก่อนเต็มเดือน" : "เทียบกับเดือนก่อนหน้า"}</span></div><Link className="button primary" href="/sales/new">+ บันทึกการขาย</Link></section>
     <section className="filter-row"><label>ฟาร์ม<select value={farmId} onChange={(event) => setFarmId(event.target.value)}><option value="">ทุกฟาร์มที่มีสิทธิ์</option>{farms.map((farm) => <option key={farm.id} value={farm.id}>{farm.name}</option>)}</select></label><label>เดือน<ThaiMonthInput value={month} onChange={setMonth} /></label></section>
-    {status ? <section className="empty-state"><p>{status}</p></section> : <>
+    {status ? <section className="empty-state"><p>{status}</p></section> : isEmpty ? <section className="empty-state"><div className="empty-icon" aria-hidden="true">∘</div><h2>ยังไม่มีรายการขายในช่วงนี้</h2><p>เปลี่ยนเดือนหรือฟาร์ม หรือเริ่มบันทึกการขายรายการแรก</p><Link className="button primary" href="/sales/new">บันทึกการขายรายการแรก</Link></section> : <>
       <section className="kpi-grid" aria-label="ตัวชี้วัดหลัก">{cards.map((card) => <article className={`kpi-card kpi-${card.tone}`} key={card.label}><p>{card.label}</p><strong>{card.value}</strong><span>{card.detail}</span></article>)}</section>
       <section className="dashboard-panel panel"><div className="panel-heading"><div><h2>แนวโน้มยอดขาย</h2><p className="muted">ยอดขายรายวันในเดือนที่เลือก</p></div><b>{money(current.total)} บาท</b></div><SalesTrendChart points={daily} /></section>
       <section className="dashboard-chart-grid"><section className="panel"><div className="panel-heading"><div><h2>เปรียบเทียบยอดขายแต่ละฟาร์ม</h2><p className="muted">เรียงตามยอดขายในช่วงที่เลือก</p></div></div><FarmComparisonChart farms={farmPoints} /></section><section className="panel"><div className="panel-heading"><div><h2>ส่วนแบ่งเจ้าของและลูกจ้าง</h2><p className="muted">ส่วนแบ่งรวมเท่ากับยอดขายรวมเสมอ</p></div></div><OwnerWorkerChart totals={current} /></section></section>

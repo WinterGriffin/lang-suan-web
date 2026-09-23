@@ -6,6 +6,16 @@ import { createClient } from "@/lib/supabase/client";
 import { authProviders } from "@/lib/auth/providers";
 import "./login.css";
 
+function lineAuthCallbackUrl() {
+  const url = new URL(window.location.href);
+  // `0.0.0.0` is a server bind address, not a browser redirect host.
+  if (url.hostname === "0.0.0.0") url.hostname = "localhost";
+  url.pathname = "/auth/callback";
+  url.search = "";
+  url.hash = "";
+  return url.toString();
+}
+
 export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -83,7 +93,7 @@ export default function LoginPage() {
     setMessage("");
     const { error: oauthError } = await createClient().auth.signInWithOAuth({
       provider: authProviders.LINE,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: lineAuthCallbackUrl() },
     });
     if (oauthError) {
       setError("ยังไม่สามารถเริ่มเข้าสู่ระบบด้วย LINE ได้ กรุณาตรวจสอบการตั้งค่าระบบ");

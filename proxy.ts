@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { appUrl } from "@/lib/auth/app-url";
 
 const publicPaths = new Set(["/login", "/register", "/auth/confirm", "/auth/callback"]);
 
@@ -28,7 +29,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
   if (claims && (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/register")) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(appUrl("/"));
   }
   return response;
 }
