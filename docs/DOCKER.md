@@ -30,10 +30,12 @@ notepad .env.local
 They are therefore passed both as Docker build arguments and container runtime
 environment variables. Rebuild the image whenever either value changes.
 
-When the Supabase URL is a local Docker Desktop service, do not use
-`127.0.0.1` or `localhost`: those point back to the web container for
-server-side requests. Use `http://host.docker.internal:54321` instead. Docker
-Desktop resolves this hostname from both the container and the host browser.
+When Supabase runs locally on Docker Desktop, keep
+`NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` so the host browser can
+reach it. Also set
+`SUPABASE_URL_INTERNAL=http://host.docker.internal:54321` so server-side
+requests from the web container reach the host's Supabase stack. The internal
+value is not bundled into browser JavaScript.
 
 Never place `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`, Docker build
 arguments, Compose, or browser-facing variables.
@@ -125,3 +127,47 @@ npm.cmd run deploy:vinext
 
 The Cloudflare deploy command requires its own authenticated Cloudflare account
 and deployment configuration; it does not deploy this Docker image.
+
+## Local email confirmation
+
+Email confirmation is enabled in `supabase/config.toml`. The local Supabase
+stack uses Inbucket/Mailpit, so confirmation messages are captured for testing
+and are not delivered to real inboxes.
+
+Start the local Supabase services (including Auth and Inbucket) before testing
+registration or confirmation:
+
+```powershell
+npx.cmd supabase start
+npx.cmd supabase status
+```
+
+After a user registers at `http://localhost:3000/register`, open
+`http://localhost:54324` to view the confirmation message and follow its link.
+The registered user cannot sign in with a password until that link is opened.
+
+For the Dockerized web server, keep these local values in `.env.local`:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_URL_INTERNAL=http://host.docker.internal:54321
+```
+
+The first address is used by browser code on the host; the second is used only
+by server-side code inside the web container. Confirm service health with:
+
+```powershell
+npx.cmd supabase status
+docker compose --env-file .env.local ps
+```
+
+Stop the local Supabase stack when it is no longer needed:
+
+```powershell
+npx.cmd supabase stop
+```
+
+For a hosted deployment, configure the hosted Supabase project's Auth site
+URL, redirect allow-list, confirmation template, and trusted SMTP provider.
+Do not expose a service-role key through Docker build arguments, Compose, or
+browser-facing environment variables.

@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import "./login.css";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -25,6 +23,7 @@ export default function LoginPage() {
     setError("");
     setMessage("");
 
+    try {
     const form = new FormData(event.currentTarget);
     const supabase = createClient();
     const { data, error: authError } = await supabase.auth.signInWithPassword({
@@ -66,8 +65,12 @@ export default function LoginPage() {
       }
     }
 
-    router.replace("/");
-    router.refresh();
+    window.location.assign("/");
+    } catch {
+      setError("ไม่สามารถติดต่อระบบยืนยันตัวตนได้ กรุณาลองใหม่");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return <main className="login-page">

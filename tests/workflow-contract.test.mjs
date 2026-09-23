@@ -15,6 +15,9 @@ const loginPage = readFileSync("app/login/page.tsx", "utf8");
 const registerPage = readFileSync("app/register/page.tsx", "utf8");
 const confirmationRoute = readFileSync("app/auth/confirm/route.ts", "utf8");
 const authConfig = readFileSync("supabase/config.toml", "utf8");
+const proxy = readFileSync("proxy.ts", "utf8");
+const browserSupabaseClient = readFileSync("lib/supabase/client.ts", "utf8");
+const serverSupabaseClient = readFileSync("lib/supabase/server.ts", "utf8");
 
 test("sale retry paths confirm server state before reporting success", () => {
   assert.match(createSale, /eq\("id", requestId\.current\)\.maybeSingle/);
@@ -60,9 +63,19 @@ test("registration requires email confirmation and login no longer asks for disp
   assert.match(registerPage, /data: \{ display_name: displayName \}/);
   assert.match(registerPage, /data\.session/);
   assert.match(confirmationRoute, /auth\.verifyOtp/);
+  assert.match(confirmationRoute, /if \(!error && data\.user\)/);
+  assert.doesNotMatch(confirmationRoute, /data\.user\?\.email_confirmed_at/);
+  assert.match(confirmationRoute, /request\.headers\.get\("host"\)/);
   assert.match(confirmationRoute, /rpc\("ensure_profile"/);
   assert.match(confirmationRoute, /auth\.signOut/);
   assert.match(loginPage, /email_not_confirmed/);
+  assert.match(loginPage, /window\.location\.assign\("\/"\)/);
+  assert.match(loginPage, /finally \{\s*setBusy\(false\)/);
+  assert.doesNotMatch(loginPage, /router\.refresh\(\)/);
   assert.doesNotMatch(loginPage, /name="name"/);
   assert.match(authConfig, /enable_confirmations = true/);
+  assert.match(proxy, /SUPABASE_URL_INTERNAL \|\| process\.env\.NEXT_PUBLIC_SUPABASE_URL/);
+  for (const source of [browserSupabaseClient, serverSupabaseClient, proxy]) {
+    assert.match(source, /name: "sb-langsuan-auth-token"/);
+  }
 });

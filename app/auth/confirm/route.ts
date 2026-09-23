@@ -5,14 +5,14 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const tokenHash = request.nextUrl.searchParams.get("token_hash");
   const type = request.nextUrl.searchParams.get("type") as EmailOtpType | null;
-  const redirectTo = request.nextUrl.clone();
-  redirectTo.pathname = "/login";
-  redirectTo.search = "";
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? request.nextUrl.host;
+  const protocol = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(/:$/, "");
+  const redirectTo = new URL("/login", `${protocol}://${host}`);
 
   if (tokenHash && type) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
-    if (!error && data.user?.email_confirmed_at) {
+    if (!error && data.user) {
       const displayName = typeof data.user.user_metadata.display_name === "string"
         ? data.user.user_metadata.display_name.trim()
         : "";

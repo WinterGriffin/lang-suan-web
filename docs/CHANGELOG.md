@@ -3,6 +3,12 @@
 ## 1.0.5 — 2026-09-23
 
 - Added a Node.js 22 standalone Next.js Docker image, Compose configuration for local `localhost:3000`, and manual Docker operation guide. Added `scripts/deploy-docker.ps1` to validate configuration, start Docker Desktop, build/recreate the service, and verify the local HTTP response in one command. This supports local/self-hosted runs only and does not change the production-readiness gates.
+- Added an optional server-only `SUPABASE_URL_INTERNAL` endpoint so Dockerized server routes can reach a local Supabase stack while browser code continues to use its host-reachable public URL.
+- Updated the session proxy to use that server-only endpoint too, preventing local Docker requests from hanging against the container's own loopback address.
+- Fixed local email confirmation to trust a successful `verifyOtp` result instead of relying on a response field not populated by the current GoTrue version.
+- Made Login recover from authentication/network exceptions and use a full navigation after a successful sign-in, avoiding an indefinitely disabled submit button and client-router refresh race.
+- Unified the Supabase SSR session cookie name across the browser URL and Docker-internal server URL so authenticated navigation reaches the dashboard instead of being redirected back to Login.
+- Documented the local Supabase Auth/Inbucket email-confirmation workflow, service commands, local Docker endpoint split, and hosted SMTP boundary.
 
 ## 1.0.4 — 2026-09-22
 
