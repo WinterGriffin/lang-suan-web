@@ -37,7 +37,7 @@
     "wrangler": "^4.136.1"
   },
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=22"
   },
   "type": "module"
 }
