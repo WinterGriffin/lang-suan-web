@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.1 — 2026-09-23
+
+- Added the Cloudflare staging origin as the hosted Supabase Auth Site URL and
+  explicit redirect allow-list entries for the PKCE OAuth callback and email
+  confirmation. This prevents a successful LINE Login from falling back to the
+  Docker-local `localhost:3000` Site URL.
+
 ## 1.5.0 — 2026-09-23
 
 - Added the approved MVP 1.5 amendment: Supabase-managed multi-provider identity

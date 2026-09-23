@@ -25,6 +25,12 @@ application profile data.
    testing. Do not use `http://0.0.0.0:3000`: it is a bind address, not a browser
    URL. If the exact callback is absent, Supabase falls back to its Site URL after
    completing the external-provider flow.
+
+   The Cloudflare staging values are:
+
+   - Site URL: `https://lang-suan-staging.lang-suan.workers.dev`
+   - Redirect URLs: `https://lang-suan-staging.lang-suan.workers.dev/auth/callback`
+     and `https://lang-suan-staging.lang-suan.workers.dev/auth/confirm`
 5. Request only `openid profile`. LINE email permission is optional and requires
    LINE approval; without a verified shared email, users may need future manual
    identity linking rather than automatic linking.
@@ -54,7 +60,9 @@ Supabase Custom Provider configuration, not in Next.js.
 Set `APP_URL=http://localhost:3000` for Docker-local deployment. Route Handlers
 use this browser-facing URL for the final callback redirect instead of the
 container listen address. For a real hosted deployment, set it to that deployment's
-HTTPS origin and register the matching `/auth/callback` URL in Supabase.
+HTTPS origin and register matching `/auth/callback` and `/auth/confirm` URLs in
+Supabase. The staging Worker uses
+`https://lang-suan-staging.lang-suan.workers.dev`.
 
 For Docker-local testing, open `http://localhost:3000`, not
 `http://0.0.0.0:3000`. `0.0.0.0` is a Docker listen address, and browsers reject
