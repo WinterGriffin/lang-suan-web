@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.5.0 — 2026-09-23
+
+- Added the approved MVP 1.5 amendment: Supabase-managed multi-provider identity
+  architecture, LINE Login as the active new provider, and no duplicate public
+  identity table.
+- Added a Supabase PKCE OAuth callback and minimal Thai LINE sign-in entry point;
+  existing email registration, confirmation, login and shared SSR session cookie
+  remain in place. LINE credentials are configured only in Supabase.
+- Reworked dashboard hierarchy to Total Sales, Owner Share, Worker Share and
+  previous-period Total Sales comparison. Existing weight, weighted price and
+  sale-count analytics remain available as secondary information.
+- Added authorized daily-sales aggregate data and real sales trend, Farm comparison
+  and Owner/Worker share visualizations. The ledger share rule is unchanged.
+- Documented Thai/Buddhist Era display versus Gregorian ISO storage and query
+  boundaries as an explicit MVP 1.5 regression contract.
+
 ## 1.0.5 — 2026-09-23
 
 - Added a Node.js 22 standalone Next.js Docker image, Compose configuration for local `localhost:3000`, and manual Docker operation guide. Added `scripts/deploy-docker.ps1` to validate configuration, start Docker Desktop, build/recreate the service, and verify the local HTTP response in one command. This supports local/self-hosted runs only and does not change the production-readiness gates.

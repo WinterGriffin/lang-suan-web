@@ -4,6 +4,16 @@
 
 Registration uses the shared centered authentication card with labelled fields for ชื่อที่แสดง, อีเมล, and รหัสผ่าน, plus a clear email-confirmation notice and a link back to Login. Login contains only อีเมล and รหัสผ่าน. Success, validation, unconfirmed-email, expired-link, and busy states must be announced with `role="status"` or `role="alert"`; password fields use the appropriate browser autocomplete token.
 
+## MVP 1.5 dashboard and LINE amendment
+
+Login places a full-width green LINE action before a restrained Thai “or” divider;
+email/password remains below it. Dashboard primary cards remain neutral surfaces
+with small semantic accents: sales green, owner blue, worker amber, comparison
+purple, and a negative comparison red. Mobile starts as a single flow with 2×2
+KPI cards and stacked chart panels; desktop may use two chart columns. Charts need
+direct value labels or an accessible text equivalent and must never create page
+horizontal overflow.
+
 ## Direction
 
 “สงบ ชัดเจน บันทึกง่าย” — a practical agricultural sales ledger with forest green, warm paper surfaces, generous touch targets and strongly aligned figures. No stock photography is needed; the transaction and its amounts are the primary content. Source implementation: `prototype.css`; interactive examples: `design-system.html`.

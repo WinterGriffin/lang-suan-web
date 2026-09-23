@@ -58,7 +58,7 @@ export default function RegisterPage() {
 
   return <main className="login-page">
     <section className="login-card">
-      <p>LANG SUAN / MVP 1.0</p>
+      <p>LANG SUAN / MVP 1.5</p>
       <h1>ลงทะเบียนใช้งาน</h1>
       <p className="auth-description">หลังลงทะเบียน คุณต้องยืนยันอีเมลก่อนจึงจะเข้าสู่ระบบได้</p>
       <form onSubmit={register}>

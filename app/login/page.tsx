@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { authProviders } from "@/lib/auth/providers";
 import "./login.css";
 
 export default function LoginPage() {
@@ -14,6 +15,8 @@ export default function LoginPage() {
     const status = new URLSearchParams(window.location.search).get("status");
     if (status === "confirmed") setMessage("ยืนยันอีเมลสำเร็จแล้ว กรุณาเข้าสู่ระบบ");
     if (status === "confirmation-error") setError("ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือหมดอายุ กรุณาลงทะเบียนใหม่หรือตรวจอีเมลฉบับล่าสุด");
+    if (status === "oauth-error") setError("เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่");
+    if (status === "profile-error") setError("ตั้งค่าโปรไฟล์จาก LINE ไม่สำเร็จ กรุณาลองใหม่");
   }, []);
 
   async function login(event: React.FormEvent<HTMLFormElement>) {
@@ -73,10 +76,27 @@ export default function LoginPage() {
     }
   }
 
+  async function loginWithLine() {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    const { error: oauthError } = await createClient().auth.signInWithOAuth({
+      provider: authProviders.LINE,
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (oauthError) {
+      setError("ยังไม่สามารถเริ่มเข้าสู่ระบบด้วย LINE ได้ กรุณาตรวจสอบการตั้งค่าระบบ");
+      setBusy(false);
+    }
+  }
+
   return <main className="login-page">
     <section className="login-card">
-      <p>LANG SUAN / MVP 1.0</p>
+      <p>LANG SUAN / MVP 1.5</p>
       <h1>เข้าสู่ระบบหลังสวน</h1>
+      <button type="button" className="line-login" disabled={busy} onClick={() => void loginWithLine()}>ดำเนินการต่อด้วย LINE</button>
+      <div className="auth-divider" aria-hidden="true"><span>หรือ</span></div>
       <form onSubmit={login}>
         <label>อีเมล<input name="email" type="email" autoComplete="email" required /></label>
         <label>รหัสผ่าน<input name="password" type="password" autoComplete="current-password" required /></label>

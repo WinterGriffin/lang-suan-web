@@ -36,6 +36,7 @@ export type Database = {
       create_farm: { Args: { p_id: string; p_name: string; p_produce_name: string; p_share_input: Database["public"]["Enums"]["share_input"] }; Returns: Database["public"]["Tables"]["farms"]["Row"] }
       ensure_profile: { Args: { p_display_name: string }; Returns: Database["public"]["Tables"]["profiles"]["Row"] }
       sales_summary: { Args: { p_end: string; p_farm_id?: string; p_start: string }; Returns: { average_price: number; farm_id: string; month_start: string; owner_share: number; sale_count: number; total_amount: number; weight_kg: number; worker_share: number }[] }
+      sales_daily_summary: { Args: { p_end: string; p_farm_id?: string; p_start: string }; Returns: { sale_date: string; total_amount: number; owner_share: number; worker_share: number; sale_count: number }[] }
       save_sale: { Args: { p_expected_version?: number; p_farm_id: string; p_id: string; p_input_share: number; p_sale_date: string; p_unit_price: number; p_weight_kg: number }; Returns: Database["public"]["Tables"]["sales"]["Row"] }
       set_farm_member: { Args: { p_farm_id: string; p_role: Database["public"]["Enums"]["farm_role"]; p_user_id: string }; Returns: undefined }
       update_farm: { Args: { p_expected_version: number; p_id: string; p_is_active: boolean; p_name: string; p_produce_name: string; p_share_input: Database["public"]["Enums"]["share_input"] }; Returns: Database["public"]["Tables"]["farms"]["Row"] }

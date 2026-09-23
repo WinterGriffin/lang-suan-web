@@ -13,7 +13,7 @@ const navigation: Array<{ href: string; label: string; icon: string; key: Sectio
 ];
 
 export function AppShell({ active, title, children }: { active: Section; title: string; children: ReactNode }) {
-  return <div className="app-shell"><aside className="sidebar" aria-label="เมนูหลัก"><Link className="brand" href="/"><span>ล</span><b>หลังสวน</b><small>LANG SUAN</small></Link><nav>{navigation.map((item) => <NavLink key={item.key} item={item} active={active} />)}</nav><p className="sidebar-note">MVP 1.0<br />กำลังเตรียมระบบข้อมูล</p></aside><main className="main-content"><header className="topbar"><div><p className="eyebrow">หลังสวน / LANG SUAN</p><h1>{title}</h1></div><LogoutButton /></header>{children}</main><nav className="bottom-nav" aria-label="เมนูหลักบนมือถือ">{navigation.map((item) => <NavLink key={item.key} item={item} active={active} />)}</nav></div>;
+  return <div className="app-shell"><aside className="sidebar" aria-label="เมนูหลัก"><Link className="brand" href="/"><span>ล</span><b>หลังสวน</b><small>LANG SUAN</small></Link><nav>{navigation.map((item) => <NavLink key={item.key} item={item} active={active} />)}</nav><p className="sidebar-note">MVP 1.5<br />บันทึกยอดขายอย่างเรียบง่าย</p></aside><main className="main-content"><header className="topbar"><div><p className="eyebrow">หลังสวน / LANG SUAN</p><h1>{title}</h1></div><LogoutButton /></header>{children}</main><nav className="bottom-nav" aria-label="เมนูหลักบนมือถือ">{navigation.map((item) => <NavLink key={item.key} item={item} active={active} />)}</nav></div>;
 }
 
 function NavLink({ item, active }: { item: (typeof navigation)[number]; active: Section }) {

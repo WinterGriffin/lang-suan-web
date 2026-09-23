@@ -23,3 +23,9 @@ export function delta(current: bigint, previous: bigint) {
 export function monthRange(month: string) { const [year, monthNumber] = month.split("-").map(Number); const start = `${year.toString().padStart(4, "0")}-${monthNumber.toString().padStart(2, "0")}-01`; const next = new Date(Date.UTC(year, monthNumber, 1)); return { start, end: `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}-01` }; }
 export function previousMonth(month: string) { const [year, index] = month.split("-").map(Number); const date = new Date(Date.UTC(year, index - 2, 1)); return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`; }
 export function bangkokMonth() { return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit" }).format(new Date()).replace("/", "-"); }
+
+export function comparisonAmount(current: bigint, previous: bigint) {
+  const difference = current - previous;
+  const prefix = difference > 0n ? "+" : "";
+  return `${prefix}${money(difference)}`;
+}

@@ -35,6 +35,7 @@ export function bangkokDate() {
 }
 
 export function thaiDate(iso: string) {
+  // LangSuan UI displays dates/months/years using Thai locale and Buddhist Era (พ.ศ.). Database and query dates remain Gregorian/ISO. Do not replace this behavior without an explicit product requirement.
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "—";
   return new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", day: "2-digit", month: "long", year: "numeric" }).format(new Date(`${iso}T00:00:00+07:00`));
 }

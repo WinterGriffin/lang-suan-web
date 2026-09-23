@@ -59,6 +59,23 @@ These decisions make the frozen scope implementable. They are **design decisions
 
 No fertilizer, fields, inventory, costs/profit, adjustments, discounts, payments, Customer or Product catalog. Authentication includes Login and the approved self-registration/email-confirmation flow; password reset and user administration UI remain outside scope. Native iOS/Android and offline capture are future phases; responsive web is v1.
 
+## 3.1 MVP 1.5 amendment — 23 September 2026
+
+- Existing Email signup, confirmation, password login and logout remain supported.
+- LINE Login is the only new active provider. Supabase-managed `auth.users` and
+  `auth.identities` are the identity model; no duplicate public identity table is
+  introduced. Provider-specific immutable IDs are owned by Supabase Auth.
+- Dashboard primary KPIs are Total Sales, Owner Share, Worker Share, and Total
+  Sales compared with the previous equivalent period. The existing total weight,
+  weighted average price/kg and sale count calculations remain available.
+- Dashboard visualizations use authorized aggregate data: daily sales trend,
+  sales-by-Farm horizontal comparison, and an Owner/Worker stacked share bar.
+- Thai UI dates/months/years use locale `th-TH` and Buddhist Era. Database,
+  API and query range values remain Gregorian ISO; do not substitute Buddhist
+  years into stored date fields.
+- The Farm share-input rule, exact decimal arithmetic, generated owner/worker
+  shares and historical Farm snapshots are unchanged.
+
 ## 4. Numbers and dates: canonical rules
 
 All business arithmetic is decimal, never binary float in production. RPC inputs are decimal strings. Reject excess input precision **before** storing into constrained numeric columns. PostgreSQL numeric rounds ties away from zero; with valid positive totals this is half-up.
