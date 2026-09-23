@@ -68,7 +68,7 @@ test("registration requires email confirmation and login no longer asks for disp
   assert.doesNotMatch(confirmationRoute, /data\.user\?\.email_confirmed_at/);
   assert.match(confirmationRoute, /appUrl\("\/login"\)/);
   assert.doesNotMatch(confirmationRoute, /request\.headers\.get\("host"\)/);
-  assert.match(authAppUrl, /process\.env\.APP_URL/);
+  assert.match(authAppUrl, /config\.app\.baseUrl/);
   assert.match(confirmationRoute, /rpc\("ensure_profile"/);
   assert.match(confirmationRoute, /auth\.signOut/);
   assert.match(loginPage, /email_not_confirmed/);
@@ -77,7 +77,7 @@ test("registration requires email confirmation and login no longer asks for disp
   assert.doesNotMatch(loginPage, /router\.refresh\(\)/);
   assert.doesNotMatch(loginPage, /name="name"/);
   assert.match(authConfig, /enable_confirmations = true/);
-  assert.match(proxy, /SUPABASE_URL_INTERNAL \|\| process\.env\.NEXT_PUBLIC_SUPABASE_URL/);
+  assert.match(proxy, /appConfig\.supabase\.serverUrl/);
   for (const source of [browserSupabaseClient, serverSupabaseClient, proxy]) {
     assert.match(source, /name: "sb-langsuan-auth-token"/);
   }

@@ -1,14 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { appUrl } from "@/lib/auth/app-url";
+import { config as appConfig } from "@/lib/config/env";
 
 const publicPaths = new Set(["/login", "/register", "/auth/confirm", "/auth/callback"]);
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
-    process.env.SUPABASE_URL_INTERNAL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    appConfig.supabase.serverUrl,
+    appConfig.supabase.publishableKey,
     {
       cookieOptions: { name: "sb-langsuan-auth-token" },
       cookies: {

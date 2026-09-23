@@ -26,8 +26,8 @@ test("LINE uses the Supabase custom provider and PKCE callback", () => {
   assert.match(proxy, /"\/auth\/callback"/);
   assert.match(supabaseConfig, /"http:\/\/localhost:3000\/auth\/callback"/);
   assert.match(supabaseConfig, /"http:\/\/127\.0\.0\.1:3000\/auth\/callback"/);
-  assert.match(appUrl, /process\.env\.APP_URL/);
-  assert.match(appUrl, /http:\/\/localhost:3000/);
+  assert.match(appUrl, /config\.app\.baseUrl/);
+  assert.match(appUrl, /config\.app\.baseUrl/);
   assert.match(callback, /appUrl\("\/"\)/);
   assert.doesNotMatch(callback, /request\.url/);
   assert.doesNotMatch(callback, /client_secret|access_token|refresh_token/);

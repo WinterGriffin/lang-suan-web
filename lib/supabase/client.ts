@@ -1,7 +1,8 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "@/packages/database/src/database.types";
+import { config } from "@/lib/config/env";
 export const createClient = () => createBrowserClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+  config.supabase.url,
+  config.supabase.publishableKey,
   { cookieOptions: { name: "sb-langsuan-auth-token" } },
 );

@@ -20,3 +20,4 @@ supabase/.temp/
 /dist/
 .vinext/
 .wrangler/
+deployment-manifest.json

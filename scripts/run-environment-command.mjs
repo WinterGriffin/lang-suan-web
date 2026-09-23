@@ -1,0 +1,10 @@
+import { spawnSync, execFileSync } from "node:child_process";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { buildEnvironment, loadParameters } from "./load-parameters.mjs";
+import { validate } from "./validate-environment.mjs";
+const [environment, action] = process.argv.slice(2);
+const parameters=loadParameters(environment); validate(parameters,{forDeploy:action!=="build"||environment!=="local"});
+const env=buildEnvironment(parameters); env.BUILD_VERSION=process.env.GITHUB_REF_NAME||"local"; env.BUILD_TIMESTAMP=new Date().toISOString();
+mkdirSync("public",{recursive:true}); writeFileSync("public/deployment-manifest.json",JSON.stringify({application:parameters.APP_NAME,environment,version:env.BUILD_VERSION,gitCommit:execFileSync("git",["rev-parse","HEAD"],{encoding:"utf8"}).trim(),buildTimestamp:env.BUILD_TIMESTAMP},null,2));
+const args=action==="build"?["vinext","build"]:["vinext-cloudflare","deploy","--config","dist/server/wrangler.json","--env",environment];
+process.exitCode=spawnSync(process.platform==="win32"?"npx.cmd":"npx",args,{stdio:"inherit",env}).status??1;
