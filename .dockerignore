@@ -1,0 +1,12 @@
+.git
+.next
+.wrangler
+dist
+node_modules
+.env
+.env.*
+*.log
+*.tmp
+*.tsbuildinfo
+docs
+supabase/.temp

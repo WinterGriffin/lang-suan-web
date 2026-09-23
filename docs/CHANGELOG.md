@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5 — 2026-09-23
+
+- Added a Node.js 22 standalone Next.js Docker image, Compose configuration for local `localhost:3000`, and manual Docker operation guide. Added `scripts/deploy-docker.ps1` to validate configuration, start Docker Desktop, build/recreate the service, and verify the local HTTP response in one command. This supports local/self-hosted runs only and does not change the production-readiness gates.
+
 ## 1.0.4 — 2026-09-22
 
 - User explicitly approved expanding scope with self-registration using display name, email, and password.
