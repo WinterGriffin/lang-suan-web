@@ -14,8 +14,10 @@ out/
 *.tsbuildinfo
 
 # Local environment files and Supabase CLI state
-.env.local
-.env*.local
+.env
+.env.*
+!.env.example
+.dev.vars*
 supabase/.temp/
 /dist/
 .vinext/

@@ -28,9 +28,11 @@ application profile data.
 
    The Cloudflare staging values are:
 
-   - Site URL: `https://lang-suan-staging.lang-suan.workers.dev`
-   - Redirect URLs: `https://lang-suan-staging.lang-suan.workers.dev/auth/callback`
-     and `https://lang-suan-staging.lang-suan.workers.dev/auth/confirm`
+   - Site URL: `https://staging.langsuanapp.com`
+   - Redirect URLs: `https://staging.langsuanapp.com/auth/callback`
+     and `https://staging.langsuanapp.com/auth/confirm`
+   - The previous `workers.dev` callback and confirmation URLs remain allowed
+     temporarily for rollback.
 5. Request only `openid profile`. LINE email permission is optional and requires
    LINE approval; without a verified shared email, users may need future manual
    identity linking rather than automatic linking.
@@ -61,8 +63,7 @@ Set `APP_URL=http://localhost:3000` for Docker-local deployment. Route Handlers
 use this browser-facing URL for the final callback redirect instead of the
 container listen address. For a real hosted deployment, set it to that deployment's
 HTTPS origin and register matching `/auth/callback` and `/auth/confirm` URLs in
-Supabase. The staging Worker uses
-`https://lang-suan-staging.lang-suan.workers.dev`.
+Supabase. The staging Worker uses `https://staging.langsuanapp.com`.
 
 For Docker-local testing, open `http://localhost:3000`, not
 `http://0.0.0.0:3000`. `0.0.0.0` is a Docker listen address, and browsers reject

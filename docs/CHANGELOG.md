@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Mapped staging Web to `staging.langsuanapp.com` through a Cloudflare Worker
+  Custom Domain, updated staging Supabase Auth Site URL and redirect allow-list,
+  and retained the previous `workers.dev` redirects for rollback.
+- Added idempotent owned-domain reconciliation, deployment smoke checks, a
+  prepared root-domain redirect Worker, and manual-only production workflow.
+  API hostnames remain reserved because this repository has no separate API.
+- Build/deploy now checks hosted Supabase key/project pairing and refuses to
+  read a production key from `.env.local`.
+
 - Fixed Windows Vinext environment commands by invoking the local CLI through
   Node directly, with explicit local/staging/production Worker names and
   environment-specific Supabase URLs. Added a local Vinext development command.

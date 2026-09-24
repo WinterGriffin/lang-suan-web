@@ -7,6 +7,9 @@ const [environment, action] = process.argv.slice(2);
 if (!["build", "deploy", "dev"].includes(action)) throw new Error("Choose build, deploy, or dev.");
 const parameters = loadParameters(environment);
 const env = buildEnvironment(parameters);
+if (environment === "production" && !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error("Production publishable key must be supplied explicitly; .env.local is not accepted.");
+}
 if (!env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
   // Only this public key is read from the ignored local file. All environment
   // identities and URLs still come from the selected parameter file.
@@ -18,6 +21,15 @@ if (!env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
   }
 }
 validate(parameters, { forDeploy: true, secretEnv: env });
+if (environment !== "local") {
+  const health = await fetch(new URL("/auth/v1/health", parameters.SUPABASE_URL), {
+    headers: { apikey: env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY },
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!health.ok || (health.headers.get("sb-project-ref") && health.headers.get("sb-project-ref") !== parameters.SUPABASE_PROJECT_REF)) {
+    throw new Error(`Supabase publishable key does not match ${environment} project or Auth is unavailable (${health.status}).`);
+  }
+}
 env.BUILD_VERSION = process.env.GITHUB_REF_NAME || "local";
 env.BUILD_TIMESTAMP = new Date().toISOString();
 mkdirSync("public",{recursive:true}); writeFileSync("public/deployment-manifest.json",JSON.stringify({application:parameters.APP_NAME,environment,version:env.BUILD_VERSION,gitCommit:execFileSync("git",["rev-parse","HEAD"],{encoding:"utf8"}).trim(),buildTimestamp:env.BUILD_TIMESTAMP},null,2));

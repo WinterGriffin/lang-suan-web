@@ -21,7 +21,14 @@
     "build:staging": "node scripts/run-environment-command.mjs staging build",
     "build:production": "node scripts/run-environment-command.mjs production build",
     "deploy:staging": "node scripts/run-environment-command.mjs staging deploy",
-    "deploy:production": "node scripts/run-environment-command.mjs production deploy"
+    "deploy:production": "node scripts/run-environment-command.mjs production deploy",
+    "domain:audit:staging": "node scripts/cloudflare-domains.mjs staging audit",
+    "domain:apply:staging": "node scripts/cloudflare-domains.mjs staging apply",
+    "domain:audit:production": "node scripts/cloudflare-domains.mjs production audit",
+    "domain:audit:root": "node scripts/cloudflare-domains.mjs root audit",
+    "deploy:root": "wrangler deploy --config wrangler.root.jsonc",
+    "smoke:staging": "node scripts/smoke-deployment.mjs staging",
+    "smoke:production": "node scripts/smoke-deployment.mjs production"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

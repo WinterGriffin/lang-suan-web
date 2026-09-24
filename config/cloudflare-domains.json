@@ -1,0 +1,17 @@
+{
+  "accountId": "43f1feb73ef4084d12fbe382de1f5eec",
+  "zoneId": "2d7c94ea85a27d39f1145ea062cd5552",
+  "zoneName": "langsuanapp.com",
+  "staging": {
+    "hostname": "staging.langsuanapp.com",
+    "worker": "lang-suan-staging"
+  },
+  "production": {
+    "hostname": "app.langsuanapp.com",
+    "worker": "lang-suan"
+  },
+  "root": {
+    "hostname": "langsuanapp.com",
+    "worker": "lang-suan-root-redirect"
+  }
+}
