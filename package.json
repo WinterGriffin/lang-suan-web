@@ -17,6 +17,7 @@
     "validate:staging": "node scripts/validate-environment.mjs staging",
     "validate:production": "node scripts/validate-environment.mjs production",
     "build:local": "node scripts/run-environment-command.mjs local build",
+    "dev:local": "node scripts/run-environment-command.mjs local dev",
     "build:staging": "node scripts/run-environment-command.mjs staging build",
     "build:production": "node scripts/run-environment-command.mjs production build",
     "deploy:staging": "node scripts/run-environment-command.mjs staging deploy",

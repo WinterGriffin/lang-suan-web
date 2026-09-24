@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Fixed Windows Vinext environment commands by invoking the local CLI through
+  Node directly, with explicit local/staging/production Worker names and
+  environment-specific Supabase URLs. Added a local Vinext development command.
+- Exposed the unauthenticated health route for deployment smoke tests and
+  documented the separate Supabase Auth SMTP setup for Resend.
+
 ## 1.5.1 — 2026-09-23
 
 - Added the Cloudflare staging origin as the hosted Supabase Auth Site URL and
