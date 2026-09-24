@@ -10,6 +10,8 @@
   API hostnames remain reserved because this repository has no separate API.
 - Build/deploy now checks hosted Supabase key/project pairing and refuses to
   read a production key from `.env.local`.
+- GitHub Environment publishable keys now use variables because they are
+  bundled into browser code; Cloudflare deployment tokens remain secrets.
 
 - Fixed Windows Vinext environment commands by invoking the local CLI through
   Node directly, with explicit local/staging/production Worker names and

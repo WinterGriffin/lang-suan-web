@@ -31,7 +31,9 @@ do not create placeholder A/CNAME records. [Cloudflare Custom Domains](https://d
 
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` is public by design but must be the key
 for the matching project. Set it separately in local ignored `.env.local` and
-each GitHub Environment. Set `CLOUDFLARE_API_TOKEN` as an Environment secret.
+each GitHub Environment as an Environment variable (`vars` context). It is
+embedded in browser bundles and is not a server secret. Set
+`CLOUDFLARE_API_TOKEN` as an Environment secret.
 Production builds reject the ignored local key and check the supplied key
 against the production Supabase Auth health endpoint before building.
 Never commit LINE Channel Secret, Supabase service-role key, Resend API key,
@@ -116,10 +118,11 @@ Worker during rollback.
 ## Remaining manual gates before production
 
 1. In GitHub repository **Settings → Environments**, open `staging` and add
-   `CLOUDFLARE_API_TOKEN` and the staging
-   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as Environment secrets. The existing
-   staging Action has failed at deploy, so rerun it and inspect its log after
-   setting the secrets. For `production`, add separate token/key secrets, set
+   `CLOUDFLARE_API_TOKEN` as an Environment secret and the staging
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as an Environment variable. The
+   staging Action failed at build while that variable was empty; rerun it after
+   setting the value. For `production`, add a separate token secret and
+   publishable-key variable, set
    required reviewers, disable self-review, and restrict deployment to the
    approved release branch. The repository is public, so these environment
    protections are available on GitHub Free.
