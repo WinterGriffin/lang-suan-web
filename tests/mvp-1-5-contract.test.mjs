@@ -19,13 +19,11 @@ test("LINE uses the Supabase custom provider and PKCE callback", () => {
   assert.match(login, /auth\.signInWithOAuth/);
   assert.match(login, /provider: authProviders\.LINE/);
   assert.match(login, /redirectTo: lineAuthCallbackUrl\(\)/);
-  assert.match(login, /url\.hostname === "0\.0\.0\.0"/);
-  assert.match(login, /url\.hostname = "localhost"/);
+  assert.match(login, /return config\.app\.callbackUrl/);
   assert.match(callback, /auth\.exchangeCodeForSession\(code\)/);
   assert.match(callback, /rpc\("ensure_profile"/);
   assert.match(proxy, /"\/auth\/callback"/);
-  assert.match(supabaseConfig, /"http:\/\/localhost:3000\/auth\/callback"/);
-  assert.match(supabaseConfig, /"http:\/\/127\.0\.0\.1:3000\/auth\/callback"/);
+  assert.match(supabaseConfig, /"https:\/\/localhost\/auth\/callback"/);
   assert.match(appUrl, /config\.app\.baseUrl/);
   assert.match(appUrl, /config\.app\.baseUrl/);
   assert.match(callback, /appUrl\("\/"\)/);

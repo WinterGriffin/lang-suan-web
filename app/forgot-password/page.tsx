@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { config } from "@/lib/config/env";
 import "../login/login.css";
 
 export default function ForgotPasswordPage() {
@@ -19,7 +20,7 @@ export default function ForgotPasswordPage() {
     const email = String(new FormData(event.currentTarget).get("email") ?? "").trim();
     try {
       const { error: authError } = await createClient().auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset`,
+        redirectTo: new URL("/auth/reset", config.app.baseUrl).toString(),
       });
       if (authError) throw authError;
       setMessage("หากมีบัญชีนี้ ระบบจะส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมล");

@@ -38,7 +38,7 @@ export default function RegisterPage() {
         password,
         options: {
           data: { display_name: displayName },
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          emailRedirectTo: new URL("/auth/confirm", config.app.baseUrl).toString(),
         },
       });
     } catch {

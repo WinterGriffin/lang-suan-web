@@ -11,7 +11,7 @@ export async function proxy(request: NextRequest) {
     appConfig.supabase.serverUrl,
     appConfig.supabase.publishableKey,
     {
-      cookieOptions: { name: "sb-langsuan-auth-token" },
+      cookieOptions: { name: "sb-langsuan-auth-token", secure: true, sameSite: "lax" },
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: (values) => {

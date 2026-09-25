@@ -9,15 +9,17 @@ point the API hostnames at the Web Worker and call them a functioning API.
 
 | Environment | Web origin | Worker | Supabase project |
 |---|---|---|---|
-| Local | `http://localhost:3000` | Vinext dev | Docker local |
+| Local | `https://localhost` | Caddy → Docker Web | Docker local |
 | Staging | `https://staging.langsuanapp.com` | `lang-suan-staging` | `orhdmqeojhesaldsuild` |
 | Production | `https://app.langsuanapp.com` | `lang-suan` | `carrbgyuqqnofczoavyg` |
 
 `api-staging.langsuanapp.com` and `api.langsuanapp.com` are reserved until an
-application API exists. `www.langsuanapp.com` is reserved for a future site.
-After production approval, a separate `lang-suan-root-redirect` Worker will
-redirect `https://langsuanapp.com` to `https://app.langsuanapp.com`, preserving
-the path and query string. No landing page is deployed.
+application API exists. `langsuanapp.com` is reserved for an independently
+deployed Marketing/Landing site; `www.langsuanapp.com` should permanently
+redirect to that root. The old `lang-suan-root-redirect` Worker artifacts are
+retained only as legacy files: the Production workflow no longer deploys or
+attaches them, and root-domain attachment through the domain script is
+disabled. No landing page is deployed.
 
 `config/*-parameter.conf` is the source of non-secret environment values. The
 Cloudflare account, zone, and project-owned custom domains are declared in
@@ -55,8 +57,10 @@ attaching staging. Do not infer that hidden/non-address records are absent.
 
 ## Local and staging
 
-Start Docker Supabase first, then `npm run dev:local`. Local mail goes to the
-Supabase local email inbox. `npm run validate:staging`, `npm run build:staging`,
+For normal browser testing, use the [local HTTPS Docker workflow](HTTPS_TLS.md)
+after starting Docker Supabase. `npm run dev:local` is a direct-port Vinext
+debug command and does not replace the trusted HTTPS path. Local mail goes to
+the Supabase local email inbox. `npm run validate:staging`, `npm run build:staging`,
 and `npm run deploy:staging` build from staging parameters and deploy only
 `lang-suan-staging`. `npm run domain:audit:staging` inspects its custom domain;
 `npm run domain:apply:staging` attaches it if absent. `npm run smoke:staging`
@@ -97,12 +101,19 @@ custom domain, then run a smoke test. Production is `workflow_dispatch` only
 and must use the protected `production` GitHub Environment with required
 reviewers. Configure those reviewers in GitHub before enabling the workflow;
 repository YAML alone cannot grant protection. Production deploy builds from
-production parameters, attaches `app.langsuanapp.com`, smokes the Web Worker,
-then deploys/attaches the root redirect and checks it. It must not run until
+production parameters, attaches `app.langsuanapp.com`, and smokes the Web
+Worker. It does not deploy Marketing or the root domain. A read-only Auth
+preflight requires a Production-scoped Supabase token with `auth_config_read`
+in the Production GitHub Environment as `SUPABASE_ACCESS_TOKEN`; it refuses
+wrong Site/Redirect URLs, missing Resend SMTP, or the Staging Send Email Hook.
+It must not run until
 staging Auth, database/RLS, LINE, email, and responsive checks have passed.
 
 Production Supabase Site URL must be `https://app.langsuanapp.com`; allow the
-exact `/auth/callback` and `/auth/confirm` URLs there. Register the production
+exact `/auth/callback`, `/auth/confirm`, and `/auth/reset` URLs there. The
+2026-09-25 read-only audit found the remote Production Site URL still at
+`http://localhost:3000`, an empty redirect allowlist, and no SMTP host. Fix
+and retest these before manual Production deployment. Register the production
 Supabase callback `https://carrbgyuqqnofczoavyg.supabase.co/auth/v1/callback`
 with the production LINE Login channel. Configure a production Resend sender,
 rate limits, backups, and monitoring before the manual production run. These

@@ -9,7 +9,7 @@ export async function createClient() {
     config.supabase.serverUrl,
     config.supabase.publishableKey,
     {
-      cookieOptions: { name: "sb-langsuan-auth-token" },
+      cookieOptions: { name: "sb-langsuan-auth-token", secure: true, sameSite: "lax" },
       cookies: {
         getAll: () => store.getAll(),
         setAll: (values) => {

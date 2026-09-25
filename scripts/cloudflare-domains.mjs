@@ -4,7 +4,10 @@ import { loadParameters } from "./load-parameters.mjs";
 
 const [environment, action, confirmation] = process.argv.slice(2);
 if (!["staging", "production", "root"].includes(environment) || !["audit", "apply"].includes(action)) {
-  throw new Error("Usage: cloudflare-domains.mjs staging|production|root audit|apply [--confirm-production]");
+  throw new Error("Usage: cloudflare-domains.mjs staging|production audit|apply, or root audit [--confirm-production]");
+}
+if (environment === "root" && action === "apply") {
+  throw new Error("Root domain is reserved for independent Marketing; legacy redirect Worker attachment is disabled.");
 }
 if (environment !== "staging" && action === "apply" && confirmation !== "--confirm-production") {
   throw new Error("Production domain changes require --confirm-production after staging acceptance.");

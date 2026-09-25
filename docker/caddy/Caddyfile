@@ -1,0 +1,16 @@
+http://localhost {
+    redir https://localhost{uri} 308
+}
+
+https://localhost {
+    tls /certs/localhost.pem /certs/localhost-key.pem
+
+    @supabase path /auth/v1/* /rest/v1/* /storage/v1/* /realtime/v1/* /functions/v1/* /graphql/v1/*
+    handle @supabase {
+        reverse_proxy host.docker.internal:54321
+    }
+
+    handle {
+        reverse_proxy web:3000
+    }
+}

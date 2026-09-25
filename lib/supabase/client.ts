@@ -4,5 +4,5 @@ import { config } from "@/lib/config/env";
 export const createClient = () => createBrowserClient<Database>(
   config.supabase.url,
   config.supabase.publishableKey,
-  { cookieOptions: { name: "sb-langsuan-auth-token" } },
+  { cookieOptions: { name: "sb-langsuan-auth-token", secure: true, sameSite: "lax" } },
 );

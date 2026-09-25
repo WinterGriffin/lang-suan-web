@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Confirmed `app.langsuanapp.com` as the canonical Production application
+  origin; the apex is reserved for an independent Marketing/Landing site and
+  `www` for its canonical redirect. Removed automatic root redirect Worker
+  deployment from the Production workflow and disabled root-domain attachment
+  in the domain script. Retained legacy Worker files without deploying them.
+  Final pre-production audit found the remote Production Supabase Auth Site
+  URL still at localhost; Production remains blocked. Added a read-only
+  hosted-Auth preflight to the Production workflow so this mismatch and the
+  missing Production Resend SMTP prevent deployment.
+
+- Prepared HTTPS-only local development behind a loopback-bound Caddy proxy
+  with ignored mkcert certificates. Browser Supabase requests now use the
+  HTTPS proxy while the web container uses the Docker-internal Supabase URL.
+  Centralized app/callback URLs, Secure/Lax Auth cookies, environment guards,
+  security headers, and public HTTPS smoke gates were added. After a complete
+  five-record DNS inventory, Cloudflare zone-wide Always Use HTTPS was enabled
+  and minimum TLS raised to 1.2; TLS 1.3 remains on, HSTS remains off. The
+  Staging redirect now passes, but the deployed Worker does not yet have the
+  new security headers. No Staging or Production Worker was deployed.
+
 - Replaced the Staging signup confirmation subject, plain-text body, and HTML
   button copy with the user-approved Thai LangSuan wording. Confirmation links
   remain staging-only; recovery email and Production delivery were unchanged.

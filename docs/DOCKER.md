@@ -1,7 +1,9 @@
 # Docker: local manual deployment
 
-This configuration runs the standard Next.js server in a small standalone
-Node.js 22 container at `http://localhost:3000`. It is separate from the
+The normal local path now runs the standard Next.js server behind Caddy at
+`https://localhost`. Start with [HTTPS/TLS setup](HTTPS_TLS.md); the direct
+HTTP Docker commands later in this document are legacy troubleshooting steps
+and bypass TLS. The app is separate from the
 Vinext/Cloudflare Worker commands in `package.json`.
 
 The container is intended for local or self-hosted deployment. It does not
@@ -30,9 +32,9 @@ notepad .env.local
 They are therefore passed both as Docker build arguments and container runtime
 environment variables. Rebuild the image whenever either value changes.
 
-When Supabase runs locally on Docker Desktop, keep
-`NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` so the host browser can
-reach it. Also set
+When Supabase runs locally on Docker Desktop, use
+`NEXT_PUBLIC_SUPABASE_URL=https://localhost` so the host browser reaches
+Supabase through the HTTPS proxy. Also set
 `SUPABASE_URL_INTERNAL=http://host.docker.internal:54321` so server-side
 requests from the web container reach the host's Supabase stack. The internal
 value is not bundled into browser JavaScript.
@@ -68,9 +70,8 @@ docker compose ps
 docker compose logs --follow web
 ```
 
-Open `http://localhost:3000`. The Compose port is intentionally bound to
-`127.0.0.1`, so it is local-only; `0.0.0.0` is a Docker listen address, not a
-browser URL. Stop following logs with `Ctrl+C`; the container
+Open `https://localhost`. Caddy binds only to `127.0.0.1`, and the web port is
+not published to the host. Stop following logs with `Ctrl+C`; the container
 continues to run in the background.
 
 ## Manual Docker commands
@@ -144,14 +145,14 @@ npx.cmd supabase start
 npx.cmd supabase status
 ```
 
-After a user registers at `http://localhost:3000/register`, open
+After a user registers at `https://localhost/register`, open
 `http://localhost:54324` to view the confirmation message and follow its link.
 The registered user cannot sign in with a password until that link is opened.
 
 For the Dockerized web server, keep these local values in `.env.local`:
 
 ```text
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_URL=https://localhost
 SUPABASE_URL_INTERNAL=http://host.docker.internal:54321
 ```
 

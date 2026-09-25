@@ -5,15 +5,28 @@ services:
       args:
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+        NEXT_PUBLIC_APP_BASE_URL: https://localhost
     container_name: langsuan-web
     image: langsuan-web:local
-    ports:
-      # This is a local-only deployment. Do not expose the container on every
-      # host interface, which Docker displays as the non-browsable 0.0.0.0 URL.
-      - "127.0.0.1:3000:3000"
+    expose:
+      - "3000"
     environment:
       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_APP_BASE_URL: https://localhost
       SUPABASE_URL_INTERNAL: ${SUPABASE_URL_INTERNAL}
-      APP_URL: ${APP_URL:-http://localhost:3000}
+      APP_URL: https://localhost
+    restart: unless-stopped
+  https-proxy:
+    image: caddy:2-alpine
+    ports:
+      - "127.0.0.1:443:443"
+      - "127.0.0.1:80:80"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./.local-certs:/certs:ro
+    depends_on:
+      - web
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped

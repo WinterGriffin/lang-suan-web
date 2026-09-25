@@ -65,6 +65,16 @@ foreach ($name in "NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_
   }
 }
 
+$supabaseUrl = (Select-String -LiteralPath $resolvedEnvFile -Pattern '^\s*NEXT_PUBLIC_SUPABASE_URL\s*=\s*(.+?)\s*$' | Select-Object -First 1).Matches[0].Groups[1].Value.Trim().Trim('"').Trim("'")
+if ($supabaseUrl -ne "https://localhost") {
+  throw "Local Docker HTTPS requires NEXT_PUBLIC_SUPABASE_URL=https://localhost. Refusing a hosted or insecure Supabase URL."
+}
+foreach ($certName in "localhost.pem", "localhost-key.pem") {
+  if (-not (Test-Path -LiteralPath (Join-Path $projectRoot ".local-certs/$certName") -PathType Leaf)) {
+    throw "Local TLS certificate missing. Run scripts/setup-local-https.ps1 first."
+  }
+}
+
 Push-Location $projectRoot
 try {
   Wait-ForDocker -TimeoutSeconds $StartupTimeoutSeconds
@@ -78,10 +88,10 @@ try {
   $deadline = (Get-Date).AddSeconds(30)
   do {
     try {
-      $response = Invoke-WebRequest -Uri "http://localhost:3000/" -UseBasicParsing -TimeoutSec 5
+      $response = Invoke-WebRequest -Uri "https://localhost/api/health" -UseBasicParsing -TimeoutSec 5
       if ($response.StatusCode -eq 200) {
         & docker compose --env-file $resolvedEnvFile ps
-        Write-Host "Lang Suan is ready at http://localhost:3000"
+        Write-Host "Lang Suan is ready at https://localhost"
         exit 0
       }
     } catch {
@@ -89,8 +99,8 @@ try {
     }
   } while ((Get-Date) -lt $deadline)
 
-  & docker compose --env-file $resolvedEnvFile logs --tail 100 web
-  throw "The container started, but http://localhost:3000 did not return HTTP 200 within 30 seconds."
+  & docker compose --env-file $resolvedEnvFile logs --tail 100 web https-proxy
+  throw "The containers started, but https://localhost/api/health did not return HTTP 200 within 30 seconds."
 } finally {
   Pop-Location
 }

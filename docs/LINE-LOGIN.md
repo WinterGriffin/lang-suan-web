@@ -19,10 +19,9 @@ application profile data.
    LINE Developers Console for the LINE Login channel.
 4. In **Authentication â†’ URL Configuration**, set the Site URL to the canonical
    application origin and add the exact post-login callback URL to Redirect URLs.
-   For this Docker-local deployment, these are
-   `http://localhost:3000` and `http://localhost:3000/auth/callback`.
-   `http://127.0.0.1:3000/auth/callback` is also allowed for direct loopback
-   testing. Do not use `http://0.0.0.0:3000`: it is a bind address, not a browser
+   For the Docker-local HTTPS path, these are
+   `https://localhost` and `https://localhost/auth/callback`.
+   Do not use `0.0.0.0`: it is a bind address, not a browser
    URL. If the exact callback is absent, Supabase falls back to its Site URL after
    completing the external-provider flow.
 
@@ -59,13 +58,13 @@ Secret in `.env.local`, `compose.yaml`, or browser variables.
 There are no new application environment variables. LINE credentials belong in the
 Supabase Custom Provider configuration, not in Next.js.
 
-Set `APP_URL=http://localhost:3000` for Docker-local deployment. Route Handlers
+Set `APP_URL=https://localhost` for Docker-local deployment. Route Handlers
 use this browser-facing URL for the final callback redirect instead of the
 container listen address. For a real hosted deployment, set it to that deployment's
 HTTPS origin and register matching `/auth/callback` and `/auth/confirm` URLs in
 Supabase. The staging Worker uses `https://staging.langsuanapp.com`.
 
-For Docker-local testing, open `http://localhost:3000`, not
+For Docker-local testing, open `https://localhost`, not
 `http://0.0.0.0:3000`. `0.0.0.0` is a Docker listen address, and browsers reject
 it before this application can load or redirect it. The hosted provider uses
 manual OAuth2 and LINE's userinfo endpoint rather than Custom OIDC discovery to

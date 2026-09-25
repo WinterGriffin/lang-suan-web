@@ -4,16 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { authProviders } from "@/lib/auth/providers";
+import { config } from "@/lib/config/env";
 import "./login.css";
 
 function lineAuthCallbackUrl() {
-  const url = new URL(window.location.href);
-  // `0.0.0.0` is a server bind address, not a browser redirect host.
-  if (url.hostname === "0.0.0.0") url.hostname = "localhost";
-  url.pathname = "/auth/callback";
-  url.search = "";
-  url.hash = "";
-  return url.toString();
+  return config.app.callbackUrl;
 }
 
 export default function LoginPage() {
