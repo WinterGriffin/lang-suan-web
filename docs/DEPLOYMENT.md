@@ -73,12 +73,21 @@ the session and Dashboard on the staging host before production approval.
 
 ## Auth email delivery
 
-Supabase Auth still owns signup, confirmation, and sessions. Configure Resend
-as custom SMTP **inside each hosted Supabase project**, not in the Web Worker.
-The SMTP host is `smtp.resend.com`, port `465`, user `resend`, and password a
-Resend API key. Use a verified sender address. Configure and test staging first;
-do not put the API key in Git or browser variables. Local Docker keeps its test
-inbox. [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)
+Supabase Auth still owns signup, confirmation, and sessions. Staging will use
+a signed Supabase Send Email Auth Hook with a recipient allowlist and Resend
+API. Production will use Resend custom SMTP only after staging passes. Local
+Docker keeps its test inbox. Never put API keys in Git or browser variables.
+[Supabase Send Email Hook](https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook)
+
+The Resend Auth Hook is **active in Staging only**. See [EMAIL.md](EMAIL.md)
+for the sender, exact-record DNS audit/apply workflow, staging recipient safety
+gate, separate Worker API key, and step-by-step Auth SMTP acceptance checks.
+Do not enable staging Auth SMTP; the application mail allowlist does not control
+SMTP traffic. The staging hook has its own allowlist, signing secret, and
+Resend key; positive signup confirmation E2E remains a gate.
+Production email and production deployment remain gated on a separate
+`RESEND_API_KEY` GitHub Environment secret, verified Worker secret, and the
+staging end-to-end results.
 
 ## CI/CD and production gate
 
@@ -130,12 +139,11 @@ Worker during rollback.
    Worker and zone permissions above. Restrict it to this account/zone and use
    the token only in GitHub Environment secrets. Add DNS Read to perform a full
    Cloudflare DNS inventory; the local OAuth session lacks that permission.
-3. In Resend, verify the sending domain/address. In **Supabase staging →
-   Authentication → SMTP Settings**, enable custom SMTP with the verified
-   sender, `smtp.resend.com:465`, user `resend`, and a Resend API key entered
-   directly there. Send a fresh signup confirmation and verify its staging
-   `/auth/confirm` return. Repeat with production's sender/key only after
-   staging succeeds.
+3. In Resend, verify `auth.langsuanapp.com` using only exact provider-supplied
+   DNS records. Deploy and configure the **staging-only** Send Email Auth Hook
+   with its signing secret, Resend key, and test-recipient allowlist as detailed
+   in `docs/EMAIL.md`. Verify signup confirmation and password recovery links
+   return to staging. Do not enable production SMTP yet.
 4. Complete staged browser acceptance: signup/confirmation, email login,
    Supabase session, LINE login and `/auth/callback`, Dashboard, Thai calendar,
    and mobile widths. Scripted smoke cannot substitute for this signed-in test.

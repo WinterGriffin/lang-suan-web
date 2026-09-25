@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { config } from "@/lib/config/env";
 import { createClient } from "@/lib/supabase/client";
 import "../login/login.css";
 
 export default function RegisterPage() {
+  const isStaging = config.app.environment === "staging";
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -29,18 +31,30 @@ export default function RegisterPage() {
     }
 
     const supabase = createClient();
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { display_name: displayName },
-        emailRedirectTo: `${window.location.origin}/auth/confirm`,
-      },
-    });
+    let result;
+    try {
+      result = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { display_name: displayName },
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+        },
+      });
+    } catch {
+      setError("เชื่อมต่อระบบลงทะเบียนไม่สำเร็จ กรุณาลองอีกครั้งภายหลัง");
+      setBusy(false);
+      return;
+    }
+    const { data, error: signUpError } = result;
     if (signUpError) {
       setError(signUpError.code === "weak_password"
         ? "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"
-        : "ลงทะเบียนไม่สำเร็จ กรุณาตรวจข้อมูลหรือลองใหม่ภายหลัง");
+        : signUpError.code === "over_email_send_rate_limit"
+          ? "ส่งอีเมลยืนยันบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่"
+          : isStaging && signUpError.code === "unexpected_failure"
+            ? "ลงทะเบียนบน Staging ไม่สำเร็จ อีเมลทดสอบอาจยังไม่ได้รับอนุญาต หรือระบบส่งอีเมลขัดข้อง กรุณาติดต่อผู้ดูแลระบบ"
+            : "ลงทะเบียนไม่สำเร็จ กรุณาตรวจข้อมูลหรือลองใหม่ภายหลัง");
       setBusy(false);
       return;
     }
@@ -61,6 +75,7 @@ export default function RegisterPage() {
       <p>LANG SUAN / MVP 1.5</p>
       <h1>ลงทะเบียนใช้งาน</h1>
       <p className="auth-description">หลังลงทะเบียน คุณต้องยืนยันอีเมลก่อนจึงจะเข้าสู่ระบบได้</p>
+      {isStaging && <p className="auth-description">ระบบทดสอบส่งอีเมลยืนยันเฉพาะที่อยู่ที่ได้รับอนุญาต</p>}
       <form onSubmit={register}>
         <label>ชื่อที่แสดง<input name="displayName" autoComplete="name" maxLength={120} required /></label>
         <label>อีเมล<input name="email" type="email" autoComplete="email" required /></label>

@@ -13,6 +13,13 @@ export function validate(p,{forDeploy=false,secretEnv=process.env}={}) {
   if(p.APP_ENV!=="local"&&!supabase.hostname.startsWith(`${p.SUPABASE_PROJECT_REF}.`)) fail("Supabase ref mismatch");
   if(p.APP_ENV!=="local") for(const value of [p.APP_BASE_URL,p.APP_AUTH_CALLBACK_URL,p.SUPABASE_URL]) if(bad.test(value)||new URL(value).protocol!=="https:") fail("non-local URL is unsafe");
   if(p.APP_ENV==="production" && (/staging/i.test(p.APP_BASE_URL)||p.SUPABASE_PROJECT_REF==="orhdmqeojhesaldsuild"||p.LOG_LEVEL==="debug"||p.ENABLE_DEBUG_TOOLS!=="false")) fail("production points to staging or debug configuration");
+  if(p.EMAIL_PROVIDER!=="resend"||p.EMAIL_ENV!==p.APP_ENV) fail("email provider or environment mismatch");
+  if(!p.EMAIL_FROM_NAME?.trim() || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(p.EMAIL_FROM_ADDRESS??"")) fail("invalid email sender");
+  if(p.EMAIL_FROM_ADDRESS!=="no-reply@auth.langsuanapp.com") fail("email sender domain mismatch");
+  if(p.APP_ENV==="staging" && !p.EMAIL_ALLOWED_RECIPIENTS) fail("staging recipient guard is missing");
+  if(p.APP_ENV==="production" && p.EMAIL_ALLOWED_RECIPIENTS) fail("production must not use staging recipient restrictions");
+  if(p.APP_ENV==="production" && (bad.test(p.APP_AUTH_CALLBACK_URL)||/staging\.langsuanapp\.com/i.test(p.APP_AUTH_CALLBACK_URL))) fail("production email callback URL is unsafe");
+  if(forDeploy && p.APP_ENV==="production" && !secretEnv.RESEND_API_KEY) fail("RESEND_API_KEY is required for production deployment");
   if(forDeploy && !secretEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) fail("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is required");
   if(forDeploy && p.APP_ENV==="production" && !secretEnv.CLOUDFLARE_API_TOKEN) fail("CLOUDFLARE_API_TOKEN is required");
 }

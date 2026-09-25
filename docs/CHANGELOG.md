@@ -2,6 +2,48 @@
 
 ## Unreleased
 
+- Replaced the Staging signup confirmation subject, plain-text body, and HTML
+  button copy with the user-approved Thai LangSuan wording. Confirmation links
+  remain staging-only; recovery email and Production delivery were unchanged.
+- Clarified the Staging registration page's test-recipient restriction and
+  differentiated email rate-limit and connection errors. A non-allowlisted
+  signup was correctly denied by the Auth Hook; the recipient allowlist and
+  signup email copy were not changed.
+- Fixed the staging Resend Auth Hook's recovery and signup token validation to
+  accept Supabase's `pkce_`-prefixed hash as well as a plain hexadecimal hash.
+  Malformed hashes remain denied; the signed hash is preserved in staging-only
+  links. The browser forgot-password request had failed at the hook with
+  `invalid_auth_token`, not an email rate limit.
+- Corrected the reset-password error message: Staging Auth returned
+  `same_password` when the old password was reused, not an expired link.
+  The form now explains that a different password is required and lets the
+  user retry in the same recovery session.
+- Diagnosed live staging Auth Hook rejection: Supabase's signed `site_url`
+  differed from the verified remote Auth Site URL. Treat it as diagnostic-only;
+  keep the signed redirect-origin check and generate all Auth email links on the
+  fixed staging origin. Recipient allowlist, signature, and project guards remain
+  mandatory. A live recovery request succeeded; Resend reported delivery, and
+  the message contained a staging-only reset link. User-completed reset/login
+  and signup confirmation E2E still require verification.
+- Registered the staging Auth sending domain with Resend, audited the
+  Cloudflare zone, added only Resend's four non-conflicting DNS records, and
+  verified the domain and records. Deployed the staging Web recovery routes and
+  staging-only Auth Hook with a recipient allowlist and scoped Resend sending
+  key. Removed non-staging Auth redirects. Negative delivery testing passed;
+  recovery delivery was later verified and Production was not changed.
+  Corrected zone-relative DNS name handling in the audit script and tested it.
+  Added metadata-only denial categories for staging Hook diagnostics.
+- Added a staging-only Supabase Send Email Auth Hook with signed-request
+  verification, strict test-recipient allowlist, staging URL checks, and
+  Resend delivery for signup/recovery. Added recovery UI/routes and negative
+  tests. Domain verification and staging secrets were completed before the
+  hook was enabled; production Auth delivery was not changed.
+- Prepared Resend transactional email integration without changing Supabase
+  Auth: non-secret environment sender settings, a server-side Resend API service
+  with fail-closed staging recipients and bounded retries, exact-record DNS
+  reconciliation tooling, tests, and a production CI secret gate. Hosted SMTP,
+  DNS, and production sending remain inactive pending Resend domain access and
+  staging Auth-email recipient controls; see `docs/EMAIL.md`.
 - Mapped staging Web to `staging.langsuanapp.com` through a Cloudflare Worker
   Custom Domain, updated staging Supabase Auth Site URL and redirect allow-list,
   and retained the previous `workers.dev` redirects for rollback.

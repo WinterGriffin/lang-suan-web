@@ -63,6 +63,9 @@ test("registration requires email confirmation and login no longer asks for disp
   assert.doesNotMatch(registerPage, /event\.currentTarget\.reset\(\)/);
   assert.match(registerPage, /data: \{ display_name: displayName \}/);
   assert.match(registerPage, /data\.session/);
+  assert.match(registerPage, /config\.app\.environment === "staging"/);
+  assert.match(registerPage, /อีเมลทดสอบอาจยังไม่ได้รับอนุญาต/);
+  assert.match(registerPage, /signUpError\.code === "over_email_send_rate_limit"/);
   assert.match(confirmationRoute, /auth\.verifyOtp/);
   assert.match(confirmationRoute, /if \(!error && data\.user\)/);
   assert.doesNotMatch(confirmationRoute, /data\.user\?\.email_confirmed_at/);

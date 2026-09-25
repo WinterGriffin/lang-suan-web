@@ -24,6 +24,7 @@ export default function LoginPage() {
   useEffect(() => {
     const status = new URLSearchParams(window.location.search).get("status");
     if (status === "confirmed") setMessage("ยืนยันอีเมลสำเร็จแล้ว กรุณาเข้าสู่ระบบ");
+    if (status === "password-reset") setMessage("ตั้งรหัสผ่านใหม่สำเร็จแล้ว กรุณาเข้าสู่ระบบ");
     if (status === "confirmation-error") setError("ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือหมดอายุ กรุณาลงทะเบียนใหม่หรือตรวจอีเมลฉบับล่าสุด");
     if (status === "oauth-error") setError("เข้าสู่ระบบด้วย LINE ไม่สำเร็จ กรุณาลองใหม่");
     if (status === "profile-error") setError("ตั้งค่าโปรไฟล์จาก LINE ไม่สำเร็จ กรุณาลองใหม่");
@@ -114,6 +115,7 @@ export default function LoginPage() {
         {error && <p className="form-error" role="alert">{error}</p>}
         <button className="button primary" disabled={busy}>{busy ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}</button>
       </form>
+      <p className="auth-switch"><Link href="/forgot-password">ลืมรหัสผ่าน?</Link></p>
       <p className="auth-switch">ยังไม่มีบัญชี? <Link href="/register">ลงทะเบียน</Link></p>
     </section>
   </main>;

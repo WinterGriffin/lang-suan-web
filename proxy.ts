@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { appUrl } from "@/lib/auth/app-url";
 import { config as appConfig } from "@/lib/config/env";
 
-const publicPaths = new Set(["/login", "/register", "/auth/confirm", "/auth/callback", "/api/health"]);
+const publicPaths = new Set(["/login", "/register", "/forgot-password", "/auth/confirm", "/auth/reset", "/auth/callback", "/api/health"]);
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });

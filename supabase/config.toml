@@ -428,7 +428,7 @@ project_id = "orhdmqeojhesaldsuild"
 
 [remotes.staging.auth]
 site_url = "https://staging.langsuanapp.com"
-additional_redirect_urls = ["https://staging.langsuanapp.com/auth/callback", "https://staging.langsuanapp.com/auth/confirm", "https://lang-suan-staging.lang-suan.workers.dev/auth/callback", "https://lang-suan-staging.lang-suan.workers.dev/auth/confirm", "http://localhost:3000/auth/callback", "http://127.0.0.1:3000/auth/callback", "http://localhost:3000/auth/confirm", "http://127.0.0.1:3000/auth/confirm"]
+additional_redirect_urls = ["https://staging.langsuanapp.com/auth/callback", "https://staging.langsuanapp.com/auth/confirm", "https://staging.langsuanapp.com/auth/reset"]
 
 [remotes.staging.auth.email]
 max_frequency = "1m0s"
