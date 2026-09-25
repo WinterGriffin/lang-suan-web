@@ -50,10 +50,10 @@ The domain script itself uses the Worker Domains API and public DNS preflight;
 it will not edit unrelated records. See [Cloudflare Workers roles and
 permissions](https://developers.cloudflare.com/workers/authorization/workers/).
 
-The locally logged-in Wrangler OAuth credential has Worker/route write but
-**not DNS records read**. Cloudflare API DNS inventory therefore remains an
-outstanding audit; public DNS and custom-domain mappings were checked before
-attaching staging. Do not infer that hidden/non-address records are absent.
+The scoped DNS token was used for a complete zone inventory before enabling
+zone-wide HTTPS. It does not have Account Workers Scripts Read, so a separate
+read-only token is needed to re-audit Worker custom-domain mappings. Do not
+infer that hidden records are absent from public DNS alone.
 
 ## Local and staging
 
@@ -65,21 +65,21 @@ and `npm run deploy:staging` build from staging parameters and deploy only
 `lang-suan-staging`. `npm run domain:audit:staging` inspects its custom domain;
 `npm run domain:apply:staging` attaches it if absent. `npm run smoke:staging`
 checks HTTPS, health, manifest, login, and a missing-code callback redirect.
-The old `workers.dev` URL remains available as a rollback origin.
+The old `workers.dev` URL is not an allowed Auth redirect.
 
 Supabase staging Auth Site URL is `https://staging.langsuanapp.com`. Its Redirect
-URLs include the exact `/auth/callback` and `/auth/confirm` paths on that host,
-plus the previous `workers.dev` URLs during the transition. Supabase owns
+URLs include only the exact `/auth/callback`, `/auth/confirm`, and `/auth/reset`
+paths on that host. Supabase owns
 `custom:line` OAuth; the LINE Developers callback is the **Supabase** URL
 `https://orhdmqeojhesaldsuild.supabase.co/auth/v1/callback`, not the Web URL.
-LINE Channel Secret stays in Supabase. Complete a browser LINE login and check
-the session and Dashboard on the staging host before production approval.
+LINE Channel Secret stays in Supabase. The user confirmed browser LINE login,
+staging redirect, and session persistence after the HTTPS deployment.
 
 ## Auth email delivery
 
-Supabase Auth still owns signup, confirmation, and sessions. Staging will use
+Supabase Auth still owns signup, confirmation, and sessions. Staging uses
 a signed Supabase Send Email Auth Hook with a recipient allowlist and Resend
-API. Production will use Resend custom SMTP only after staging passes. Local
+API. Production Supabase Auth now has separate Resend custom SMTP. Local
 Docker keeps its test inbox. Never put API keys in Git or browser variables.
 [Supabase Send Email Hook](https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook)
 
@@ -88,10 +88,12 @@ for the sender, exact-record DNS audit/apply workflow, staging recipient safety
 gate, separate Worker API key, and step-by-step Auth SMTP acceptance checks.
 Do not enable staging Auth SMTP; the application mail allowlist does not control
 SMTP traffic. The staging hook has its own allowlist, signing secret, and
-Resend key; positive signup confirmation E2E remains a gate.
-Production email and production deployment remain gated on a separate
+Resend key. The user confirmed Staging signup/confirmation, recovery, LINE,
+logout, session persistence, and staging-only redirects after the HTTPS deploy.
+Production application mail and deployment remain gated on a separate
 `RESEND_API_KEY` GitHub Environment secret, verified Worker secret, and the
-staging end-to-end results.
+remaining Production readiness checks. Do not reuse the Supabase SMTP key for
+the Worker secret.
 
 ## CI/CD and production gate
 
@@ -105,19 +107,24 @@ production parameters, attaches `app.langsuanapp.com`, and smokes the Web
 Worker. It does not deploy Marketing or the root domain. A read-only Auth
 preflight requires a Production-scoped Supabase token with `auth_config_read`
 in the Production GitHub Environment as `SUPABASE_ACCESS_TOKEN`; it refuses
-wrong Site/Redirect URLs, missing Resend SMTP, or the Staging Send Email Hook.
+wrong Site/Redirect URLs, missing Resend SMTP details, the Staging Send Email
+Hook, or disabled Custom OAuth while LINE is enabled.
 It must not run until
 staging Auth, database/RLS, LINE, email, and responsive checks have passed.
 
 Production Supabase Site URL must be `https://app.langsuanapp.com`; allow the
 exact `/auth/callback`, `/auth/confirm`, and `/auth/reset` URLs there. The
-2026-09-25 read-only audit found the remote Production Site URL still at
-`http://localhost:3000`, an empty redirect allowlist, and no SMTP host. Fix
-and retest these before manual Production deployment. Register the production
+2026-09-25 remediation set those exact URLs and installed Resend SMTP with a
+dedicated sending-only key scoped to the verified `auth.langsuanapp.com`
+domain. The read-only Auth preflight now stops at disabled Production Custom
+OAuth. Register the production
 Supabase callback `https://carrbgyuqqnofczoavyg.supabase.co/auth/v1/callback`
-with the production LINE Login channel. Configure a production Resend sender,
-rate limits, backups, and monitoring before the manual production run. These
-remote settings are not changed by Web deployment.
+with the production LINE Login channel and verify its provider configuration
+before enabling LINE. The sender is `no-reply@auth.langsuanapp.com`; actual
+Production email delivery and links remain untested because the Production
+application domain has not been deployed. Review rate limits, backups, and
+monitoring before the manual production run. These remote settings are not
+changed by Web deployment.
 
 ## Verification and rollback
 
@@ -154,12 +161,14 @@ Worker during rollback.
    DNS records. Deploy and configure the **staging-only** Send Email Auth Hook
    with its signing secret, Resend key, and test-recipient allowlist as detailed
    in `docs/EMAIL.md`. Verify signup confirmation and password recovery links
-   return to staging. Do not enable production SMTP yet.
+   return to staging. Production SMTP is now configured separately; do not
+   reuse the Staging hook or key.
 4. Complete staged browser acceptance: signup/confirmation, email login,
    Supabase session, LINE login and `/auth/callback`, Dashboard, Thai calendar,
    and mobile widths. Scripted smoke cannot substitute for this signed-in test.
 5. Before manually running production workflow, verify the production Supabase
-   migration/RLS contract in a disposable project, configure production Auth
-   Site/Redirect URLs, register the production Supabase callback in LINE,
-   configure SMTP/rate limits/backups/monitoring, and review the production
-   publishable key. Only then approve the protected GitHub production job.
+   migration/RLS contract in a disposable project, enable and verify the
+   production LINE provider/callback, test Production SMTP delivery only when
+   the application domain is ready, configure rate limits/backups/monitoring,
+   and review the production publishable key. Only then approve the protected
+   GitHub production job.

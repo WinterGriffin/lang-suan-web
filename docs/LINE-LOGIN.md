@@ -28,10 +28,11 @@ application profile data.
    The Cloudflare staging values are:
 
    - Site URL: `https://staging.langsuanapp.com`
-   - Redirect URLs: `https://staging.langsuanapp.com/auth/callback`
-     and `https://staging.langsuanapp.com/auth/confirm`
-   - The previous `workers.dev` callback and confirmation URLs remain allowed
-     temporarily for rollback.
+   - Redirect URLs: `https://staging.langsuanapp.com/auth/callback`,
+     `https://staging.langsuanapp.com/auth/confirm`, and
+     `https://staging.langsuanapp.com/auth/reset`
+   - Do not allow `workers.dev`, localhost, or Production origins in Staging
+     Auth redirects; only the exact Staging callback paths are configured.
 5. Request only `openid profile`. LINE email permission is optional and requires
    LINE approval; without a verified shared email, users may need future manual
    identity linking rather than automatic linking.
@@ -63,6 +64,14 @@ use this browser-facing URL for the final callback redirect instead of the
 container listen address. For a real hosted deployment, set it to that deployment's
 HTTPS origin and register matching `/auth/callback` and `/auth/confirm` URLs in
 Supabase. The staging Worker uses `https://staging.langsuanapp.com`.
+
+Production Supabase Auth now points to `https://app.langsuanapp.com`, but its
+Custom OAuth feature is still disabled. Before Production deployment, verify
+that the Production LINE channel uses
+`https://carrbgyuqqnofczoavyg.supabase.co/auth/v1/callback`, configure and
+enable the matching `custom:line` provider in Production Supabase, and test
+that the final app redirect stays on `https://app.langsuanapp.com`. Never
+place the LINE Channel Secret in this repository or browser environment.
 
 For Docker-local testing, open `https://localhost`, not
 `http://0.0.0.0:3000`. `0.0.0.0` is a Docker listen address, and browsers reject

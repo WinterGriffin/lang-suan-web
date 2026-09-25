@@ -28,8 +28,16 @@ export function verifyHostedAuth(environment, parameters, auth) {
   if (environment === "staging" && auth.hook_send_email_enabled !== true) {
     throw new Error("Staging Send Email Auth Hook is not enabled.");
   }
-  if (environment === "production" && (auth.hook_send_email_enabled !== false || auth.smtp_host !== "smtp.resend.com")) {
+  if (environment === "production" && (auth.hook_send_email_enabled !== false
+    || auth.smtp_host !== "smtp.resend.com"
+    || String(auth.smtp_port) !== "465"
+    || auth.smtp_user !== "resend"
+    || auth.smtp_admin_email !== "no-reply@auth.langsuanapp.com"
+    || !auth.smtp_pass)) {
     throw new Error("Production must use Resend SMTP without the Staging Auth Hook.");
+  }
+  if (environment === "production" && parameters.ENABLE_LINE_LOGIN === "true" && auth.custom_oauth_enabled !== true) {
+    throw new Error("Production LINE login requires enabled Supabase Custom OAuth.");
   }
 }
 

@@ -14,6 +14,11 @@ function remoteFor(environment) {
     mailer_autoconfirm: false,
     hook_send_email_enabled: environment === "staging",
     smtp_host: environment === "production" ? "smtp.resend.com" : "",
+    smtp_port: environment === "production" ? "465" : "",
+    smtp_user: environment === "production" ? "resend" : "",
+    smtp_admin_email: environment === "production" ? "no-reply@auth.langsuanapp.com" : "",
+    smtp_pass: environment === "production" ? "test-secret-placeholder" : "",
+    custom_oauth_enabled: environment === "production",
   };
 }
 
@@ -33,6 +38,15 @@ test("Production preflight requires Resend SMTP, not the Staging hook", () => {
   const valid = remoteFor("production");
   assert.throws(() => verifyHostedAuth("production", p, { ...valid, smtp_host: "" }), /Resend SMTP/);
   assert.throws(() => verifyHostedAuth("production", p, { ...valid, hook_send_email_enabled: true }), /Resend SMTP/);
+  assert.throws(() => verifyHostedAuth("production", p, { ...valid, smtp_port: "587" }), /Resend SMTP/);
+  assert.throws(() => verifyHostedAuth("production", p, { ...valid, smtp_admin_email: "other@example.com" }), /Resend SMTP/);
+  assert.throws(() => verifyHostedAuth("production", p, { ...valid, smtp_pass: "" }), /Resend SMTP/);
+});
+
+test("Production preflight blocks enabled LINE UI when Supabase Custom OAuth is disabled", () => {
+  const p = loadParameters("production");
+  const valid = remoteFor("production");
+  assert.throws(() => verifyHostedAuth("production", p, { ...valid, custom_oauth_enabled: false }), /Custom OAuth/);
 });
 
 test("Production workflow audits hosted Auth before deployment", () => {

@@ -18,8 +18,10 @@ Cloudflare DNS inventory contained five records: only Staging's AAAA was
 proxied; four Resend email records were DNS-only. No HTTP-only dependency was
 found. Cloudflare zone-wide **Always Use HTTPS** was then enabled and the
 minimum TLS version raised from 1.0 to 1.2. TLS 1.3 remains enabled; HSTS
-remains disabled. Staging HTTP now redirects to HTTPS. The deployed Worker
-still lacks the new security headers until a reviewed Staging deployment.
+remains disabled. Staging HTTP now redirects to HTTPS. After deployment of
+commit `4f7414c`, live Staging HTTPS/security-header smoke passed. The user
+confirmed signup/confirmation, LINE login, password reset, logout, session
+persistence, and staging-only Auth redirects.
 Cloudflare SSL mode reads `Full`, not `Full (strict)`; confirm the absence of
 any independent HTTPS origin before changing this zone-wide setting. Do not
 enable Flexible SSL. For a Worker custom domain, the
@@ -33,8 +35,12 @@ The canonical Production application origin is `app.langsuanapp.com`.
 Legacy root-to-app redirect Worker files remain in the repository but are no
 longer deployed by the Production workflow. The public root, www, and app
 hostnames did not resolve from this environment on 2026-09-25. Production
-Supabase Auth still uses a localhost Site URL and must be corrected before
-Production deployment. No Production Worker, Auth, or DNS change was made.
+Supabase Auth now uses `https://app.langsuanapp.com`, three exact app
+redirects, and dedicated Resend SMTP. Production Custom OAuth remains
+disabled while the app exposes LINE login; the read-only CI preflight blocks
+that mismatch. Production Worker, DNS, and application deployment remain
+untouched. Cloudflare Workers-domain audit requires an account-scoped Workers
+Scripts Read token; the DNS-only token returned 403.
 
 ## Local setup on Windows
 
@@ -69,7 +75,8 @@ current request host. Local Supabase Auth Site URL and app redirects are now
 Auth** callback, not `/auth/callback` on the app. Verify any LINE Developers
 Console changes separately. The staging Resend Auth Hook continues to generate
 only staging HTTPS links and retains its strict recipient allowlist. Production
-email delivery was not modified.
+Supabase SMTP is configured separately, but actual delivery and generated
+links remain unverified until the Production app origin is live.
 
 Supabase SSR session cookies are `Secure; SameSite=Lax`. They are readable by
 browser JavaScript as required by the current `@supabase/ssr` browser client;

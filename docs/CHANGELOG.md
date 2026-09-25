@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Validated the trusted Local HTTPS Docker/Caddy runtime and deployed the HTTPS
+  fixes to Staging. Live HTTPS, security headers, TLS 1.2/1.3, and Staging Auth
+  configuration passed; the user confirmed signup/confirmation, LINE login,
+  password reset, logout, session persistence, and staging-only redirects.
+  After these gates, changed Production Supabase Auth to the canonical
+  `https://app.langsuanapp.com` Site URL and three exact redirects. Installed a
+  dedicated, domain-scoped Resend sending key directly into Production
+  Supabase SMTP without recording its value. Strengthened the read-only CI
+  preflight to reject missing SMTP details and disabled Custom OAuth when LINE
+  is enabled. Production LINE, Worker/DNS, and application deployment remain
+  blocked; no Production Worker was deployed.
+
 - Confirmed `app.langsuanapp.com` as the canonical Production application
   origin; the apex is reserved for an independent Marketing/Landing site and
   `www` for its canonical redirect. Removed automatic root redirect Worker

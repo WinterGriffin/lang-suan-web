@@ -2,9 +2,9 @@
 
 ## Current and target architecture
 
-Supabase Auth owns accounts, signup confirmation, password login, sessions, and LINE OAuth. Signup confirmation and password recovery are implemented on the deployed staging app. Magic link, invitation, and email-change UI are not implemented. Local Supabase routes confirmation email to Inbucket. Hosted staging Auth invokes the Resend hook; recovery email delivery is verified, while user-completed confirmation/reset and login E2E remain pending.
+Supabase Auth owns accounts, signup confirmation, password login, sessions, and LINE OAuth. Signup confirmation and password recovery are implemented on the deployed staging app. Magic link, invitation, and email-change UI are not implemented. Local Supabase routes confirmation email to Inbucket. Hosted staging Auth invokes the Resend hook; the user confirmed signup/confirmation, recovery, login/logout, LINE, session persistence, and staging-only redirects after the HTTPS deployment.
 
-Target: **staging only** uses a Supabase Send Email Auth Hook (`supabase/functions/staging-send-email`) with a strict recipient allowlist and the Resend API. Production will use Supabase Auth with Resend SMTP, without this hook. Future application transactional mail calls `lib/email/service.mjs` on the server. There is no marketing mail, public send-email endpoint, email table, or webhook in this MVP.
+Staging uses a Supabase Send Email Auth Hook (`supabase/functions/staging-send-email`) with a strict recipient allowlist and the Resend API. Production Supabase Auth uses Resend SMTP without this hook. Future application transactional mail calls `lib/email/service.mjs` on the server. There is no marketing mail, public send-email endpoint, email table, or webhook in this MVP.
 
 The sender is `LangsuanApp <no-reply@auth.langsuanapp.com>` on the verified Resend sending domain. A separate sending domain can be added later for non-Auth messages.
 
@@ -12,7 +12,7 @@ The sender is `LangsuanApp <no-reply@auth.langsuanapp.com>` on the verified Rese
 
 `config/*-parameter.conf` declares `EMAIL_PROVIDER`, `EMAIL_ENV`, `EMAIL_FROM_NAME`, and `EMAIL_FROM_ADDRESS`. Staging also declares `EMAIL_ALLOWED_RECIPIENTS=none`, which intentionally blocks all application-generated mail until replaced with an explicit comma-separated list of test addresses. Local follows the same fail-closed rule. Production must not have a recipient restriction. The service rejects missing/invalid configuration and missing `RESEND_API_KEY` without contacting Resend. It logs provider, type, environment, outcome, timestamp, message ID or failure category, never recipients, body, API key, or Auth links. It retries network errors, HTTP 429, and 5xx at most twice using a stable idempotency key; permanent errors are not retried. A durable queue may be added only when actual application notifications require one.
 
-Store `RESEND_API_KEY` only in ignored `.env.local` for local development, in the Cloudflare Worker secret store for runtime application email, and in GitHub Environment secrets if CI requires it. The key value must never enter `NEXT_PUBLIC_*`, parameter files, Git, browser bundles, or logs. Auth SMTP password should be configured directly in Supabase, preferably with a separate Resend key from the Worker API key. The production workflow requires its GitHub Environment `RESEND_API_KEY` secret before building/deploying; this is a gate, not proof that the Worker runtime secret or Supabase SMTP is installed. Use `wrangler secret put RESEND_API_KEY --name lang-suan-staging` only when staging is ready to send application mail. Configure production only after full staging verification.
+Store `RESEND_API_KEY` only in ignored `.env.local` for local development, in the Cloudflare Worker secret store for runtime application email, and in GitHub Environment secrets if CI requires it. The key value must never enter `NEXT_PUBLIC_*`, parameter files, Git, browser bundles, or logs. The Production Auth SMTP password is configured directly in Supabase with a dedicated Resend sending key distinct from the Worker API key. The production workflow requires its GitHub Environment `RESEND_API_KEY` secret before building/deploying; this is a gate, not proof that the Worker runtime secret is installed. Use `wrangler secret put RESEND_API_KEY --name lang-suan-staging` only when staging is ready to send application mail.
 
 ## DNS: audit before applying
 
@@ -40,13 +40,13 @@ The user raised the Staging Supabase Auth email rate limit to 30 per hour; a rea
 5. In **Supabase staging → Authentication → Hooks → Send Email**, select HTTP, URL `https://orhdmqeojhesaldsuild.supabase.co/functions/v1/staging-send-email`, and use the same generated signing secret. Keep the email provider enabled. According to Supabase, when this hook is enabled it replaces SMTP delivery for Auth emails. Test an allowed mailbox, then a non-allowlisted one and check Resend delivery logs for **no** message to the latter.
 6. Test signup → confirmation link → `/auth/confirm` → login. Test forgot password → recovery email → `/auth/reset` → new password → login. Test both links for absence of localhost and production origins. Run negative tests for both signup and recovery using a non-allowlisted mailbox. Do not use real production user addresses for positive tests.
 
-## Production Auth SMTP — not configured
+## Production Auth SMTP — configured, delivery not yet tested
 
-[Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) supports Resend. [Resend SMTP settings](https://resend.com/changelog/smtp-service): host `smtp.resend.com`, port `465`, username `resend`, password a Resend API key. This is the **future production path only**, after staging passes; no production Auth, SMTP, DNS, secret, or deployment setting is changed by the staging setup.
+[Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) supports Resend. [Resend SMTP settings](https://resend.com/changelog/smtp-service): host `smtp.resend.com`, port `465`, username `resend`. After the user confirmed Staging Auth E2E, Production Supabase Auth was set to `https://app.langsuanapp.com` with exact `/auth/callback`, `/auth/confirm`, and `/auth/reset` redirects. A new Resend key with sending access limited to verified `auth.langsuanapp.com` was installed directly as the Production SMTP password; its value was never printed or placed in Git, docs, or local parameter files. The sender is `LangsuanApp <no-reply@auth.langsuanapp.com>`. Production email delivery and generated links have **not** been tested because the Production application origin is not deployed.
 
 **Safety gate:** `EMAIL_ALLOWED_RECIPIENTS` protects only application mail. `STAGING_EMAIL_ALLOWLIST` protects staging Supabase Auth mail through its separate hook. Neither value is installed in or applied to the production project.
 
-No automated test sends actual email. Production project `carrbgyuqqnofczoavyg` remains untouched until staging delivery, SPF/DKIM, DMARC, callbacks, and login-after-confirmation and login-after-reset have passed.
+No automated test sends actual Production email. The Staging recipient guard remains isolated; Production uses normal SMTP with no Staging Auth Hook. DMARC is still absent and requires a separate monitoring-policy decision after sender inventory.
 
 ## Troubleshooting and rotation
 
