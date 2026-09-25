@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Recorded the user-confirmed LINE Developers provider/channel split:
+  `LangSuanAppDev` for Local and Staging, `LangSuanAppPrd` for Production.
+  Environment validation now rejects swapped provider/channel names and
+  mismatched Supabase OAuth callbacks. Production LINE Custom OAuth in Supabase
+  remains a deployment blocker even though the Production LINE callback was
+  confirmed in LINE Developers Console. No Channel credentials were stored.
+
 - Validated the trusted Local HTTPS Docker/Caddy runtime and deployed the HTTPS
   fixes to Staging. Live HTTPS, security headers, TLS 1.2/1.3, and Staging Auth
   configuration passed; the user confirmed signup/confirmation, LINE login,

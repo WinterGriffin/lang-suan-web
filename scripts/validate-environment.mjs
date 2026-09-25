@@ -8,10 +8,13 @@ export function validate(p,{forDeploy=false,secretEnv=process.env}={}) {
   const expectedOrigins={local:"https://localhost",staging:"https://staging.langsuanapp.com",production:"https://app.langsuanapp.com"};
   if(p.APP_BASE_URL!==expectedOrigins[p.APP_ENV]) fail("application origin does not match environment");
   for(const key of flags) if(!/^(true|false)$/.test(p[key])) fail(`${key} is not Boolean`);
+  const expectedLineName=p.APP_ENV==="production"?"LangSuanAppPrd":"LangSuanAppDev";
+  if(p.LINE_DEVELOPERS_PROVIDER_NAME!==expectedLineName||p.LINE_LOGIN_CHANNEL_NAME!==expectedLineName) fail("LINE Developers provider/channel does not match environment");
   const base=new URL(p.APP_BASE_URL), callback=new URL(p.APP_AUTH_CALLBACK_URL), supabase=new URL(p.SUPABASE_URL);
   if(base.protocol!=="https:") fail("application origin must use HTTPS");
   if(p.APP_ENV==="local" && (supabase.origin!==base.origin || p.SUPABASE_URL_INTERNAL!=="http://127.0.0.1:54321")) fail("local Supabase must use the HTTPS proxy in the browser and loopback internally");
-  if(p.APP_ENV==="local" && p.SUPABASE_AUTH_CALLBACK_URL!=="https://localhost/auth/v1/callback") fail("local Supabase OAuth callback must use HTTPS proxy");
+  const expectedSupabaseCallback=p.APP_ENV==="local"?"https://localhost/auth/v1/callback":`${p.SUPABASE_URL}/auth/v1/callback`;
+  if(p.SUPABASE_AUTH_CALLBACK_URL!==expectedSupabaseCallback) fail("Supabase OAuth callback does not match environment");
   if(callback.origin!==base.origin||callback.pathname!=="/auth/callback") fail("callback must be APP_BASE_URL/auth/callback");
   if(p.APP_ENV!=="local"&&!supabase.hostname.startsWith(`${p.SUPABASE_PROJECT_REF}.`)) fail("Supabase ref mismatch");
   if(p.APP_ENV!=="local") for(const value of [p.APP_BASE_URL,p.APP_AUTH_CALLBACK_URL,p.SUPABASE_URL]) if(bad.test(value)||new URL(value).protocol!=="https:") fail("non-local URL is unsafe");

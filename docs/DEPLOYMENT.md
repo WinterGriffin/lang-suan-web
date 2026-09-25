@@ -117,10 +117,13 @@ exact `/auth/callback`, `/auth/confirm`, and `/auth/reset` URLs there. The
 2026-09-25 remediation set those exact URLs and installed Resend SMTP with a
 dedicated sending-only key scoped to the verified `auth.langsuanapp.com`
 domain. The read-only Auth preflight now stops at disabled Production Custom
-OAuth. Register the production
-Supabase callback `https://carrbgyuqqnofczoavyg.supabase.co/auth/v1/callback`
-with the production LINE Login channel and verify its provider configuration
-before enabling LINE. The sender is `no-reply@auth.langsuanapp.com`; actual
+OAuth. The user confirmed that the new Production LINE Developers
+provider/channel `LangSuanAppPrd` has the correct Supabase callback
+`https://carrbgyuqqnofczoavyg.supabase.co/auth/v1/callback`. Local and Staging
+use the renamed `LangSuanAppDev` channel. Their non-secret names are recorded
+in environment parameter files; configure and verify the matching Production
+Supabase `custom:line` provider before enabling LINE. The sender is
+`no-reply@auth.langsuanapp.com`; actual
 Production email delivery and links remain untested because the Production
 application domain has not been deployed. Review rate limits, backups, and
 monitoring before the manual production run. These remote settings are not

@@ -56,8 +56,21 @@ to the local web service, register its Supabase callback URL with the LINE chann
 then add the tunnel host to Supabase redirect allow-lists. Do not put a Channel
 Secret in `.env.local`, `compose.yaml`, or browser variables.
 
-There are no new application environment variables. LINE credentials belong in the
-Supabase Custom Provider configuration, not in Next.js.
+The non-secret LINE Developers provider and LINE Login channel names are recorded
+in each `config/*-parameter.conf` and validated against its environment. They
+are deployment metadata, not browser variables or credentials:
+
+| Environment | LINE Developers provider / channel | Supabase callback |
+| --- | --- | --- |
+| Local | `LangSuanAppDev` / `LangSuanAppDev` | `https://localhost/auth/v1/callback` for the local HTTPS proxy; use a reachable tunnel callback for external LINE testing |
+| Staging | `LangSuanAppDev` / `LangSuanAppDev` | `https://orhdmqeojhesaldsuild.supabase.co/auth/v1/callback` |
+| Production | `LangSuanAppPrd` / `LangSuanAppPrd` | `https://carrbgyuqqnofczoavyg.supabase.co/auth/v1/callback` |
+
+The Local/Staging provider-channel rename and new Production channel/callback
+were confirmed by the user in LINE Developers Console. The names do not prove
+that the Production Supabase Custom Provider is enabled or has the matching
+Channel ID and Secret. Credentials belong in the matching Supabase Custom
+Provider configuration, not in Next.js or parameter files.
 
 Set `APP_URL=https://localhost` for Docker-local deployment. Route Handlers
 use this browser-facing URL for the final callback redirect instead of the
@@ -66,10 +79,10 @@ HTTPS origin and register matching `/auth/callback` and `/auth/confirm` URLs in
 Supabase. The staging Worker uses `https://staging.langsuanapp.com`.
 
 Production Supabase Auth now points to `https://app.langsuanapp.com`, but its
-Custom OAuth feature is still disabled. Before Production deployment, verify
-that the Production LINE channel uses
-`https://carrbgyuqqnofczoavyg.supabase.co/auth/v1/callback`, configure and
-enable the matching `custom:line` provider in Production Supabase, and test
+Custom OAuth feature is still disabled. The user confirmed the Production LINE
+channel callback is `https://carrbgyuqqnofczoavyg.supabase.co/auth/v1/callback`.
+Before Production deployment, configure and enable the matching `custom:line`
+provider in Production Supabase with the new Production channel, then test
 that the final app redirect stays on `https://app.langsuanapp.com`. Never
 place the LINE Channel Secret in this repository or browser environment.
 

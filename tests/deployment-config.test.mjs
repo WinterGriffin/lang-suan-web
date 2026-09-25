@@ -17,6 +17,18 @@ test("staging cannot use production origin or Worker", () => {
   assert.throws(() => validate({ ...parameters, CLOUDFLARE_WORKER_NAME: "lang-suan" }), /Worker name/);
 });
 
+test("LINE Developers provider, channel, and Supabase callback stay isolated", () => {
+  for (const environment of ["local", "staging", "production"]) {
+    const p = loadParameters(environment);
+    const expectedName = environment === "production" ? "LangSuanAppPrd" : "LangSuanAppDev";
+    assert.equal(p.LINE_DEVELOPERS_PROVIDER_NAME, expectedName);
+    assert.equal(p.LINE_LOGIN_CHANNEL_NAME, expectedName);
+    assert.throws(() => validate({ ...p, LINE_DEVELOPERS_PROVIDER_NAME: "WrongChannel" }), /LINE Developers provider\/channel/);
+    assert.throws(() => validate({ ...p, LINE_LOGIN_CHANNEL_NAME: "WrongChannel" }), /LINE Developers provider\/channel/);
+    assert.throws(() => validate({ ...p, SUPABASE_AUTH_CALLBACK_URL: "https://wrong.supabase.co/auth/v1/callback" }), /Supabase OAuth callback/);
+  }
+});
+
 test("HTTPS origins and callbacks are isolated by environment", () => {
   for (const environment of ["local", "staging", "production"]) {
     const p = loadParameters(environment);
