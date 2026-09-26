@@ -11,10 +11,11 @@ for (const environment of ["local", "staging", "production"]) {
   });
 }
 
-test("staging cannot use production origin or Worker", () => {
+test("staging cannot use production origin, Worker, or Supabase project", () => {
   const parameters = loadParameters("staging");
   assert.throws(() => validate({ ...parameters, APP_BASE_URL: "https://app.langsuanapp.com" }), /application origin/);
   assert.throws(() => validate({ ...parameters, CLOUDFLARE_WORKER_NAME: "lang-suan" }), /Worker name/);
+  assert.throws(() => validate({ ...parameters, SUPABASE_PROJECT_REF: "carrbgyuqqnofczoavyg" }), /project ref/);
 });
 
 test("LINE Developers provider, channel, and Supabase callback stay isolated", () => {
@@ -67,5 +68,5 @@ test("Production deployment leaves Marketing root independent", () => {
   const workflow = readFileSync(".github/workflows/deploy-production.yml", "utf8");
   const domains = readFileSync("scripts/cloudflare-domains.mjs", "utf8");
   assert.doesNotMatch(workflow, /deploy:root|root apply|smoke-root/);
-  assert.match(domains, /root domain is reserved for independent Marketing/i);
+  assert.doesNotMatch(domains, /\["staging", "production", "root"\]/);
 });

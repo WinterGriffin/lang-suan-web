@@ -1,28 +1,24 @@
 import { readFileSync } from "node:fs";
 import { resolve4, resolve6, resolveCname } from "node:dns/promises";
-import { loadParameters } from "./load-parameters.mjs";
+import { loadAdministrationSecrets } from "./load-admin-secrets.mjs";
 
-const [environment, action, confirmation] = process.argv.slice(2);
-if (!["staging", "production", "root"].includes(environment) || !["audit", "apply"].includes(action)) {
-  throw new Error("Usage: cloudflare-domains.mjs staging|production audit|apply, or root audit [--confirm-production]");
+const [environment, action, ...options] = process.argv.slice(2);
+const ci = options.includes("--ci");
+const confirmation = options.find((option) => option === "--confirm-production");
+if (!["staging", "production"].includes(environment) || !["audit", "apply"].includes(action)) {
+  throw new Error("Usage: cloudflare-domains.mjs staging|production audit|apply [--ci] [--confirm-production]");
 }
-if (environment === "root" && action === "apply") {
-  throw new Error("Root domain is reserved for independent Marketing; legacy redirect Worker attachment is disabled.");
-}
-if (environment !== "staging" && action === "apply" && confirmation !== "--confirm-production") {
+if (environment === "production" && action === "apply" && confirmation !== "--confirm-production") {
   throw new Error("Production domain changes require --confirm-production after staging acceptance.");
 }
 
 const desired = JSON.parse(readFileSync(new URL("../config/cloudflare-domains.json", import.meta.url), "utf8"));
 const target = desired[environment];
-if (environment !== "root") {
-  const parameters = loadParameters(environment);
-  if (new URL(parameters.APP_BASE_URL).hostname !== target.hostname || parameters.CLOUDFLARE_WORKER_NAME !== target.worker) {
-    throw new Error("Worker domain does not match the selected environment parameters.");
-  }
+const { parameters, secrets } = loadAdministrationSecrets(environment, ["CLOUDFLARE_API_TOKEN"], { source: ci ? "ci" : "local" });
+if (new URL(parameters.APP_BASE_URL).hostname !== target.hostname || parameters.CLOUDFLARE_WORKER_NAME !== target.worker) {
+  throw new Error("Worker domain does not match the selected environment parameters.");
 }
-const token = process.env.CLOUDFLARE_API_TOKEN;
-if (!token) throw new Error("CLOUDFLARE_API_TOKEN is required (never store it in this file).");
+const token = secrets.CLOUDFLARE_API_TOKEN;
 
 async function cloudflare(method, path, body) {
   const response = await fetch(`https://api.cloudflare.com/client/v4${path}`, {

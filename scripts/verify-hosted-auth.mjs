@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { loadParameters } from "./load-parameters.mjs";
+import { loadAdministrationSecrets } from "./load-admin-secrets.mjs";
 
 export function verifyHostedAuth(environment, parameters, auth) {
   if (!["staging", "production"].includes(environment)) throw new Error("Choose staging or production.");
@@ -36,21 +37,33 @@ export function verifyHostedAuth(environment, parameters, auth) {
     || !auth.smtp_pass)) {
     throw new Error("Production must use Resend SMTP without the Staging Auth Hook.");
   }
-  if (environment === "production" && parameters.ENABLE_LINE_LOGIN === "true" && auth.custom_oauth_enabled !== true) {
-    throw new Error("Production LINE login requires enabled Supabase Custom OAuth.");
+}
+
+export async function verifyLineAuthorization(parameters, fetchImpl = fetch) {
+  if (parameters.APP_ENV !== "production" || parameters.ENABLE_LINE_LOGIN !== "true") return;
+  const authorize = new URL("/auth/v1/authorize", parameters.SUPABASE_URL);
+  authorize.searchParams.set("provider", "custom:line");
+  authorize.searchParams.set("redirect_to", parameters.APP_AUTH_CALLBACK_URL);
+  const response = await fetchImpl(authorize, { redirect: "manual", signal: AbortSignal.timeout(10000) });
+  const location = response.headers.get("location");
+  let host = "";
+  try { host = location ? new URL(location).hostname : ""; } catch { /* handled below */ }
+  if (response.status !== 302 || host !== "access.line.me") {
+    throw new Error("Production LINE Custom OAuth did not redirect to LINE authorization.");
   }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const environment = process.argv[2];
   if (!["staging", "production"].includes(environment)) throw new Error("Choose staging or production.");
-  if (!process.env.SUPABASE_ACCESS_TOKEN) throw new Error("A scoped Supabase auth_config_read token is required.");
-  const parameters = loadParameters(environment);
+  const ci = process.argv.includes("--ci");
+  const { parameters, secrets } = loadAdministrationSecrets(environment, ["SUPABASE_ACCESS_TOKEN"], { source: ci ? "ci" : "local" });
   const response = await fetch(`https://api.supabase.com/v1/projects/${parameters.SUPABASE_PROJECT_REF}/config/auth`, {
-    headers: { authorization: `Bearer ${process.env.SUPABASE_ACCESS_TOKEN}` },
+    headers: { authorization: `Bearer ${secrets.SUPABASE_ACCESS_TOKEN}` },
     signal: AbortSignal.timeout(10000),
   });
   if (!response.ok) throw new Error(`Supabase Auth config read failed (${response.status}).`);
   verifyHostedAuth(environment, parameters, await response.json());
+  await verifyLineAuthorization(parameters);
   console.log(`${environment} hosted Auth URLs and delivery policy passed.`);
 }

@@ -4,7 +4,9 @@ const bad=/(localhost|127\.0\.0\.1|0\.0\.0\.0|REPLACE_WITH|<[^>]+>)/i;
 const fail=(m)=>{throw new Error(`Unsafe environment configuration: ${m}`)};
 export function validate(p,{forDeploy=false,secretEnv=process.env}={}) {
   const expectedWorkers={local:"lang-suan-local",staging:"lang-suan-staging",production:"lang-suan"};
+  const expectedProjectRefs={local:null,staging:"orhdmqeojhesaldsuild",production:"carrbgyuqqnofczoavyg"};
   if(p.CLOUDFLARE_WORKER_NAME!==expectedWorkers[p.APP_ENV]) fail("Cloudflare Worker name does not match environment");
+  if(expectedProjectRefs[p.APP_ENV] && p.SUPABASE_PROJECT_REF!==expectedProjectRefs[p.APP_ENV]) fail("Supabase project ref does not match environment");
   const expectedOrigins={local:"https://localhost",staging:"https://staging.langsuanapp.com",production:"https://app.langsuanapp.com"};
   if(p.APP_BASE_URL!==expectedOrigins[p.APP_ENV]) fail("application origin does not match environment");
   for(const key of flags) if(!/^(true|false)$/.test(p[key])) fail(`${key} is not Boolean`);
@@ -18,6 +20,7 @@ export function validate(p,{forDeploy=false,secretEnv=process.env}={}) {
   if(callback.origin!==base.origin||callback.pathname!=="/auth/callback") fail("callback must be APP_BASE_URL/auth/callback");
   if(p.APP_ENV!=="local"&&!supabase.hostname.startsWith(`${p.SUPABASE_PROJECT_REF}.`)) fail("Supabase ref mismatch");
   if(p.APP_ENV!=="local") for(const value of [p.APP_BASE_URL,p.APP_AUTH_CALLBACK_URL,p.SUPABASE_URL]) if(bad.test(value)||new URL(value).protocol!=="https:") fail("non-local URL is unsafe");
+  if(p.APP_ENV==="staging" && (/app\.langsuanapp\.com/i.test(p.APP_BASE_URL)||p.SUPABASE_PROJECT_REF==="carrbgyuqqnofczoavyg")) fail("staging points to production configuration");
   if(p.APP_ENV==="production" && (/staging/i.test(p.APP_BASE_URL)||p.SUPABASE_PROJECT_REF==="orhdmqeojhesaldsuild"||p.LOG_LEVEL==="debug"||p.ENABLE_DEBUG_TOOLS!=="false")) fail("production points to staging or debug configuration");
   if(p.EMAIL_PROVIDER!=="resend"||p.EMAIL_ENV!==p.APP_ENV) fail("email provider or environment mismatch");
   if(!p.EMAIL_FROM_NAME?.trim() || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(p.EMAIL_FROM_ADDRESS??"")) fail("invalid email sender");
@@ -29,4 +32,4 @@ export function validate(p,{forDeploy=false,secretEnv=process.env}={}) {
   if(forDeploy && !secretEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) fail("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is required");
   if(forDeploy && p.APP_ENV==="production" && !secretEnv.CLOUDFLARE_API_TOKEN) fail("CLOUDFLARE_API_TOKEN is required");
 }
-if(import.meta.url===`file:///${process.argv[1].replace(/\\/g,"/")}`){try{const p=loadParameters(process.argv[2]);validate(p,{forDeploy:process.argv.includes("--for-deploy")});console.log(`Validated ${p.APP_ENV}.`)}catch(e){console.error(e.message);process.exitCode=1}}
+if(process.argv[1]&&import.meta.url===`file:///${process.argv[1].replace(/\\/g,"/")}`){try{const p=loadParameters(process.argv[2]);validate(p,{forDeploy:process.argv.includes("--for-deploy")});console.log(`Validated ${p.APP_ENV}.`)}catch(e){console.error(e.message);process.exitCode=1}}

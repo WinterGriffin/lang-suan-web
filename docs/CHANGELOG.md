@@ -2,6 +2,56 @@
 
 ## Unreleased
 
+- Added a redacted staging/production configuration matrix and explicit
+  deployment boundaries. CI now emits only safe environment fingerprints,
+  validates immutable per-environment Supabase refs, and the Production
+  workflow no longer invokes a Staging smoke target. Credential replacement,
+  provider-side verification, and revocation remain release gates.
+
+- Recorded read-only GitHub confirmation that both protected Environments now
+  contain the expected secret names and separate publishable-key variables.
+  GitHub does not reveal values, so origin, scope, uniqueness, and functional
+  credential validation remain outstanding.
+
+- Added explicit local administration secret-file separation: the ignored
+  staging file remains `config/.env.dns.local`, while
+  `config/.env.dns.production.local` is production-only. Administration
+  commands now require an explicit target and source, validate the immutable
+  target identity before use, and cannot fall back across environments.
+
+- Updated the Production Auth preflight for current Supabase Custom Providers:
+  it now verifies that `custom:line` initiates an authorization redirect to
+  LINE instead of relying on the obsolete global configuration field. Provider
+  initiation passed; a completed Production LINE login remains a post-deploy
+  smoke test.
+
+- Applied the approved MVP 1.0 and MVP 1.5 dashboard-series migrations to the
+  confirmed Production Supabase project after read-only history/SQL preflight.
+  Verified the resulting migration history and schema contract with temporary
+  schema-only dumps; no data dump, deployment, or domain attachment was made.
+
+- Added `RELEASE-STATUS.md` as the operational MVP 1.5 release record. It
+  distinguishes owner-reported Staging authenticated acceptance from
+  independently observed evidence, records the completed Staging dashboard
+  migration, and retains a NO-GO decision pending credential containment,
+  Production recovery/migrations, LINE Custom OAuth, Worker domain attachment,
+  and controlled Production smoke tests.
+
+- Replaced the unavailable Production PITR assumption with recorded logical
+  roles, schema, and data dumps for the Free-plan project. The owner waived
+  independently verified restore only for the initial MVP 1.5 release; it is
+  explicitly not a proven recovery point. Provider settings, Storage objects,
+  and secrets remain outside the dump, and a repeatable independently verified
+  recovery procedure remains a post-launch requirement.
+
+- Configured GitHub's protected `production` Environment for the repository:
+  `main` is the sole deployment branch and repository owner `WinterGriffin` is
+  the required reviewer. Self-review prevention is deliberately disabled
+  because the owner is the sole reviewer; this limitation is recorded in the
+  release status. Stored the verified Production Supabase publishable key as an
+  Environment variable without recording its value. No Production deployment
+  or database change was made.
+
 - Recorded the user-confirmed LINE Developers provider/channel split:
   `LangSuanAppDev` for Local and Staging, `LangSuanAppPrd` for Production.
   Environment validation now rejects swapped provider/channel names and

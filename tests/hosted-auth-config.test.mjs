@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { loadParameters } from "../scripts/load-parameters.mjs";
-import { verifyHostedAuth } from "../scripts/verify-hosted-auth.mjs";
+import { verifyHostedAuth, verifyLineAuthorization } from "../scripts/verify-hosted-auth.mjs";
 
 function remoteFor(environment) {
   const p = loadParameters(environment);
@@ -43,10 +43,10 @@ test("Production preflight requires Resend SMTP, not the Staging hook", () => {
   assert.throws(() => verifyHostedAuth("production", p, { ...valid, smtp_pass: "" }), /Resend SMTP/);
 });
 
-test("Production preflight blocks enabled LINE UI when Supabase Custom OAuth is disabled", () => {
+test("Production LINE authorization must redirect to LINE", async () => {
   const p = loadParameters("production");
-  const valid = remoteFor("production");
-  assert.throws(() => verifyHostedAuth("production", p, { ...valid, custom_oauth_enabled: false }), /Custom OAuth/);
+  await assert.doesNotReject(() => verifyLineAuthorization(p, async () => ({ status: 302, headers: new Headers({ location: "https://access.line.me/oauth2/v2.1/authorize" }) })));
+  await assert.rejects(() => verifyLineAuthorization(p, async () => ({ status: 400, headers: new Headers() })), /did not redirect to LINE/);
 });
 
 test("Production workflow audits hosted Auth before deployment", () => {

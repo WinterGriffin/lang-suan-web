@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { loadAdministrationSecrets } from "./load-admin-secrets.mjs";
 
 const domain = "auth.langsuanapp.com";
 const zone = JSON.parse(readFileSync(new URL("../config/cloudflare-domains.json", import.meta.url), "utf8"));
@@ -47,10 +48,12 @@ async function json(url, token, options = {}) {
 }
 
 async function main() {
-  const mode = process.argv[2] ?? "audit";
+  const [environment, mode, ...options] = process.argv.slice(2);
+  const ci = options.includes("--ci");
+  if (!["staging", "production"].includes(environment)) throw new Error("Choose staging or production explicitly.");
   if (!["audit", "apply"].includes(mode)) throw new Error("Choose audit or apply.");
-  if (!process.env.RESEND_API_KEY || !process.env.CLOUDFLARE_API_TOKEN) throw new Error("RESEND_API_KEY and CLOUDFLARE_API_TOKEN are required server-side.");
-  const resendHeaders = { Authorization: `Bearer ${process.env.RESEND_API_KEY}` };
+  const { secrets } = loadAdministrationSecrets(environment, ["RESEND_API_KEY", "CLOUDFLARE_API_TOKEN"], { source: ci ? "ci" : "local" });
+  const resendHeaders = { Authorization: `Bearer ${secrets.RESEND_API_KEY}` };
   const listResponse = await fetch("https://api.resend.com/domains", { headers: resendHeaders });
   if (!listResponse.ok) throw new Error(`Resend domain lookup failed (${listResponse.status}).`);
   const listed = await listResponse.json();
@@ -66,7 +69,7 @@ async function main() {
     const url = new URL(`https://api.cloudflare.com/client/v4/zones/${zone.zoneId}/dns_records`);
     url.searchParams.set("name", name);
     url.searchParams.set("per_page", "100");
-    const data = await json(url, process.env.CLOUDFLARE_API_TOKEN);
+    const data = await json(url, secrets.CLOUDFLARE_API_TOKEN);
     if (data.result_info?.total_pages > 1) throw new Error(`Too many DNS records at ${name}; manual review required.`);
     existingByName[name] = data.result ?? [];
   }
@@ -75,7 +78,7 @@ async function main() {
   if (mode === "audit") return;
   for (const item of actions.filter((item) => item.action === "create")) {
     const body = { type: item.type, name: item.name, content: item.content, ttl: 1, proxied: false, comment: "LangSuan Resend auth sending domain", ...(item.type === "MX" ? { priority: item.priority } : {}) };
-    await json(`https://api.cloudflare.com/client/v4/zones/${zone.zoneId}/dns_records`, process.env.CLOUDFLARE_API_TOKEN, { method: "POST", body: JSON.stringify(body) });
+    await json(`https://api.cloudflare.com/client/v4/zones/${zone.zoneId}/dns_records`, secrets.CLOUDFLARE_API_TOKEN, { method: "POST", body: JSON.stringify(body) });
     console.log(`created: ${item.type} ${item.name}`);
   }
 }
