@@ -14,12 +14,53 @@ point the API hostnames at the Web Worker and call them a functioning API.
 | Production | `https://app.langsuanapp.com` | `lang-suan` | `carrbgyuqqnofczoavyg` |
 
 `api-staging.langsuanapp.com` and `api.langsuanapp.com` are reserved until an
-application API exists. `langsuanapp.com` is reserved for an independently
-deployed Marketing/Landing site; `www.langsuanapp.com` should permanently
-redirect to that root. The old `lang-suan-root-redirect` Worker artifacts are
-retained only as legacy files: the Production workflow no longer deploys or
-attaches them, and root-domain attachment through the domain script is
-disabled. No landing page is deployed.
+application API exists. `langsuanapp.com` must remain untouched unless the
+owner explicitly authorizes a separate change. The independent Marketing/
+Landing site is canonical at `www.langsuanapp.com`; it must not redirect to
+the apex. The old `lang-suan-root-redirect` Worker artifacts are retained only
+as legacy files: the Production workflow no longer deploys or attaches them,
+and root-domain attachment through the domain script is disabled.
+
+## Independent landing-site deployment guard
+
+The landing site is a dependency-free static package at `landing-page/public/`,
+separate from the Vinext application. It contains `index.html`, `styles.css`,
+`overrides.css`, `robots.txt`, `sitemap.xml`, and `site.webmanifest`; it has no
+build step. `landing-page/wrangler.jsonc` is the only landing deployment
+configuration. The legacy Pages-project API returned `404` for this account on 27
+September 2026 because Cloudflare now serves Pages on its Workers platform.
+The accepted equivalent is a dedicated static-assets Worker, with no modules,
+bindings, routes, application configuration, or application source files.
+Publish it only after the following checks:
+
+1. Run Pages commands from the landing directory (or an isolated empty working
+   directory), never from this repository root. The root `wrangler.jsonc` and
+   generated `dist/server/wrangler.json` are application-Worker configuration.
+2. Before creating a project or uploading files, inspect the effective
+   Wrangler configuration. If it reports a redirected Worker configuration,
+   names `lang-suan`, references `dist/client`, attaches server modules, or
+   says that Pages is being delegated to Workers, stop. Do not use that command
+   for the landing deployment until the reason is reported and the owner gives
+   direction. For the current Cloudflare platform, use only
+   `npm run landing:preview` or `npm run landing:deploy`; these select the
+   isolated config and `public/` asset directory. Verify the asset list
+   contains only the landing package.
+3. Deploy a non-production preview first. Verify its response is the static
+   landing page, its mobile layout, every CTA target is exactly
+   `https://app.langsuanapp.com`, and `/robots.txt`, `/sitemap.xml`, and
+   `/site.webmanifest` are served from the package.
+4. Only after preview acceptance may the dedicated Pages project receive a
+   production deployment and `www.langsuanapp.com`. Re-read the existing
+   `www` DNS record immediately before attachment; never create, change, or
+   redirect `langsuanapp.com` without written owner approval.
+
+On 27 September 2026, running `wrangler pages project create` from this
+repository violated this boundary: Wrangler redirected through the generated
+Worker configuration and created an unintended `langsuan-landing` Worker with
+application artifacts. It had no custom domain or DNS record, was verified as
+such, and was deleted after owner direction. The valid replacement is the
+static-only `langsuan-landing` Worker, previewed as
+`langsuan-landing-preview`, then attached solely to `www.langsuanapp.com`.
 
 `config/*-parameter.conf` is the source of non-secret environment values. The
 Cloudflare account, zone, and project-owned custom domains are declared in

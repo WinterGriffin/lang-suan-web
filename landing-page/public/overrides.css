@@ -1,0 +1,19 @@
+/* Keep all MVP 1.5 feature cards visually equal. */
+.feature-grid article.featured {
+  background: #fff;
+  border-color: #e7ece6;
+}
+
+.feature-grid .featured h3,
+.feature-grid .featured p,
+.feature-grid .featured > span {
+  color: inherit;
+}
+
+.feature-grid .featured > span {
+  color: #809087;
+}
+
+.feature-grid .featured p {
+  color: #64736b;
+}
