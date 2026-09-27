@@ -1,10 +1,27 @@
 # LangSuan MVP 1.5 release status
 
-Status updated: 26 September 2026 (Asia/Bangkok)
-Decision: **NO-GO**
+Status updated: 27 September 2026 (Asia/Bangkok)
+Decision: **OWNER-ACCEPTED — production deployment and manual acceptance complete.**
 
 This is an operational release record. It does not amend frozen product or
 database requirements.
+
+## Production acceptance closure
+
+**PASS — owner-reported manual acceptance, 27 September 2026.** The repository
+owner reports that the Production deployment was completed successfully and
+that all application functions were manually tested successfully, including
+authenticated use. This is owner-attested evidence: no recordings, test-account
+credentials, or browser session were supplied to Codex, so Codex did not
+independently observe the authenticated journeys. The scripted unauthenticated
+Production smoke checks independently passed: TLS, health, manifest, login,
+missing-code callback containment, HTTP-to-HTTPS redirect, and required
+security headers.
+
+The owner will manage credential rotation outside this repository and update
+the operational record afterwards. That follow-up does not invalidate this
+accepted functional test result; it remains an operational security task until
+its replacement and revocation evidence is recorded.
 
 ## Release identity
 

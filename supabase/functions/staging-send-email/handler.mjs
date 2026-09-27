@@ -34,21 +34,26 @@ export function prepareAuthEmail(payload, allowlist) {
     if (redirect.origin !== stagingOrigin) throw new Error("auth_redirect_origin_mismatch");
   }
   const action = data.email_action_type;
-  if (!["signup", "recovery"].includes(action)) throw new Error("unsupported_auth_email");
+  if (!["signup", "recovery", "email_change"].includes(action)) throw new Error("unsupported_auth_email");
   if (typeof data.token_hash !== "string" || !/^(?:pkce_)?[a-fA-F0-9]{40,128}$/.test(data.token_hash)) throw new Error("invalid_auth_token");
-  const url = new URL(action === "signup" ? "/auth/confirm" : "/auth/reset", stagingOrigin);
+  const url = new URL(action === "recovery" ? "/auth/reset" : "/auth/confirm", stagingOrigin);
   url.searchParams.set("token_hash", data.token_hash);
-  url.searchParams.set("type", action === "signup" ? "email" : "recovery");
+  url.searchParams.set("type", action === "signup" ? "email" : action);
   const confirmationUrl = url.toString();
   const htmlUrl = confirmationUrl.replaceAll("&", "&amp;");
   const isSignup = action === "signup";
-  const subject = isSignup ? "ยืนยันการลงทะเบียนใช้งาน LangSuan" : "ตั้งรหัสผ่านใหม่ LangsuanApp";
+  const isEmailChange = action === "email_change";
+  const subject = isSignup ? "ยืนยันการลงทะเบียนใช้งาน LangSuan" : isEmailChange ? "ยืนยันอีเมลสำหรับเข้าสู่ระบบ LangSuan" : "ตั้งรหัสผ่านใหม่ LangsuanApp";
   const text = isSignup
     ? `เรียน ท่านผู้ใช้งาน\n\nขอบพระคุณที่ลงทะเบียนใช้งาน LangSuan\n\nเพื่อยืนยันอีเมลและเปิดใช้งานบัญชีของท่าน กรุณาคลิกปุ่ม “ยืนยันการลงทะเบียน” ด้านล่าง\n\nยืนยันการลงทะเบียน: ${confirmationUrl}\n\nหากท่านไม่ได้เป็นผู้ดำเนินการลงทะเบียน สามารถละเว้นอีเมลฉบับนี้ได้ โดยไม่จำเป็นต้องดำเนินการใด ๆ เพิ่มเติม\n\nเพื่อความปลอดภัย LangSuan จะไม่ขอให้ท่านแจ้งรหัสผ่าน รหัส OTP หรือข้อมูลสำคัญของบัญชีผ่านทางอีเมล\n\nขอแสดงความนับถือ\nทีมงาน LangSuan\n\nอีเมลฉบับนี้ส่งโดยระบบอัตโนมัติ กรุณาอย่าตอบกลับอีเมลฉบับนี้`
-    : `ตั้งรหัสผ่านใหม่: ${confirmationUrl}`;
+    : isEmailChange
+      ? `เรียน ท่านผู้ใช้งาน\n\nกรุณายืนยันอีเมลเพื่อเพิ่มวิธีเข้าสู่ระบบด้วยอีเมลและรหัสผ่านในบัญชี LangSuan เดิมของท่าน\n\nยืนยันอีเมล: ${confirmationUrl}\n\nหากท่านไม่ได้เป็นผู้ดำเนินการ โปรดละเว้นอีเมลฉบับนี้\n\nอีเมลฉบับนี้ส่งโดยระบบอัตโนมัติ กรุณาอย่าตอบกลับอีเมลฉบับนี้`
+      : `ตั้งรหัสผ่านใหม่: ${confirmationUrl}`;
   const html = isSignup
     ? `<!doctype html><html lang="th"><body style="font-family:Arial,sans-serif;color:#1d3028;line-height:1.8"><h1 style="font-size:24px">${subject}</h1><p>เรียน ท่านผู้ใช้งาน</p><p>ขอบพระคุณที่ลงทะเบียนใช้งาน <strong>LangSuan</strong></p><p>เพื่อยืนยันอีเมลและเปิดใช้งานบัญชีของท่าน กรุณาคลิกปุ่ม <strong>“ยืนยันการลงทะเบียน”</strong> ด้านล่าง</p><p><a href="${htmlUrl}" style="display:inline-block;background:#1d513b;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold">ยืนยันการลงทะเบียน</a></p><p>หากท่านไม่ได้เป็นผู้ดำเนินการลงทะเบียน สามารถละเว้นอีเมลฉบับนี้ได้ โดยไม่จำเป็นต้องดำเนินการใด ๆ เพิ่มเติม</p><p>เพื่อความปลอดภัย LangSuan จะไม่ขอให้ท่านแจ้งรหัสผ่าน รหัส OTP หรือข้อมูลสำคัญของบัญชีผ่านทางอีเมล</p><p>ขอแสดงความนับถือ<br>ทีมงาน LangSuan</p><p style="font-size:12px;color:#607168"><em>อีเมลฉบับนี้ส่งโดยระบบอัตโนมัติ กรุณาอย่าตอบกลับอีเมลฉบับนี้</em></p></body></html>`
-    : `<!doctype html><html lang="th"><body style="font-family:Arial,sans-serif;color:#1d3028"><h1>${subject}</h1><p><a href="${htmlUrl}">ตั้งรหัสผ่านใหม่</a></p><p>หากไม่ได้ร้องขออีเมลนี้ ไม่ต้องดำเนินการใด ๆ</p></body></html>`;
+    : isEmailChange
+      ? `<!doctype html><html lang="th"><body style="font-family:Arial,sans-serif;color:#1d3028;line-height:1.8"><h1>${subject}</h1><p>กรุณายืนยันอีเมลเพื่อเพิ่มวิธีเข้าสู่ระบบด้วยอีเมลและรหัสผ่านในบัญชี LangSuan เดิมของท่าน</p><p><a href="${htmlUrl}">ยืนยันอีเมล</a></p><p>หากท่านไม่ได้เป็นผู้ดำเนินการ โปรดละเว้นอีเมลฉบับนี้</p></body></html>`
+      : `<!doctype html><html lang="th"><body style="font-family:Arial,sans-serif;color:#1d3028"><h1>${subject}</h1><p><a href="${htmlUrl}">ตั้งรหัสผ่านใหม่</a></p><p>หากไม่ได้ร้องขออีเมลนี้ ไม่ต้องดำเนินการใด ๆ</p></body></html>`;
   return {
     from: "LangsuanApp <no-reply@auth.langsuanapp.com>",
     to: [originalRecipient],

@@ -2,6 +2,44 @@
 
 ## Unreleased
 
+- Fixed the duplicate-profile path for an authenticated LINE user: Register
+  now adds and verifies an email/password identity on the existing Auth user
+  instead of creating a second Auth user/profile. Identity matching is based
+  only on verified normalized email, never display name. The Staging Auth
+  Email Hook now supports the signed `email_change` confirmation flow.
+
+- Corrected the Production Supabase Auth **Confirm signup** template from the default English copy to the approved Thai LangSuan registration content. The update is restricted to the confirmation subject/body, preserves the signed Supabase confirmation URL and existing Production SMTP/Auth settings, and verifies the returned configuration without sending a Production email.
+
+- Recognized the existing `CLOUDFLARE_WEB` Production administration-token name in the strict local credential-file allowlist. Unrecognized or duplicate names remain rejected; the confirmation-template command reads only the Supabase token.
+
+- Imported the independently deployable LangSuan landing source into
+  `landing-page/public/` with an isolated static-assets Worker config and
+  validation/deployment commands. The landing package is intentionally outside
+  the Next.js application and deploys only to `langsuan-landing` /
+  `langsuan-landing-preview`; `app.langsuanapp.com` remains on `lang-suan`.
+
+- Added a landing-site deployment guard after an unintended 27 September 2026
+  `langsuan-landing` Worker deployment: the current Wrangler command, when
+  invoked at the application repository root, redirected through generated
+  Worker configuration and uploaded application artifacts instead of the
+  static landing package. The artifact had no custom domain or DNS mapping and
+  was deleted after the owner directed the corrected deployment. Cloudflare's
+  legacy Pages-project API is unavailable for this account; after reporting
+  that platform migration, deployed the static package only through dedicated
+  static-assets Workers (`langsuan-landing-preview` then `langsuan-landing`).
+  Preview checks passed for Home, mobile breakpoints, CTA, robots, sitemap,
+  manifest and canonical URL. The production static Worker version
+  `c7cf3c30-c880-485b-b583-0ddd16d79c48` is attached only to
+  `www.langsuanapp.com`; the apex and `app.langsuanapp.com` were unchanged.
+
+- Recorded owner-reported Production acceptance on 27 September 2026: the
+  deployment completed successfully and the owner manually passed all
+  application functions, including authenticated use. The automated public
+  Production smoke checks also passed for TLS, health, manifest, login,
+  callback containment, HTTPS redirect, and required security headers.
+  Credential rotation will be managed outside the repository and recorded
+  separately when complete.
+
 - Added a redacted staging/production configuration matrix and explicit
   deployment boundaries. CI now emits only safe environment fingerprints,
   validates immutable per-environment Supabase refs, and the Production

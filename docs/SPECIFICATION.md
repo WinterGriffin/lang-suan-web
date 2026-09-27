@@ -76,6 +76,17 @@ No fertilizer, fields, inventory, costs/profit, adjustments, discounts, payments
 - The Farm share-input rule, exact decimal arithmetic, generated owner/worker
   shares and historical Farm snapshots are unchanged.
 
+## 3.2 Identity-linking amendment — 27 September 2026
+
+- A person is identified only by a verified, case-normalized email address;
+  `display_name` is presentation data and must never link or merge accounts.
+- When an authenticated user without an email identity opens Register, the
+  screen adds verified email/password authentication to that existing Supabase
+  user. It must not call `signUp` or create another `profiles` row.
+- An email that belongs to a different Auth user is rejected. Account merging
+  and deletion are controlled remediation operations after the owner proves
+  control of both identities; they are never automatic browser behavior.
+
 ## 4. Numbers and dates: canonical rules
 
 All business arithmetic is decimal, never binary float in production. RPC inputs are decimal strings. Reject excess input precision **before** storing into constrained numeric columns. PostgreSQL numeric rounds ties away from zero; with valid positive totals this is half-up.

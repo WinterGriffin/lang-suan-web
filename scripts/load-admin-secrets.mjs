@@ -6,6 +6,7 @@ import { validate } from "./validate-environment.mjs";
 export const administrationSecretNames = Object.freeze([
   "CLOUDFLARE_API_TOKEN",
   "CLOUDFLARE_WORKERS_READ_TOKEN",
+  "CLOUDFLARE_WEB",
   "RESEND_API_KEY",
   "SUPABASE_ACCESS_TOKEN",
 ]);

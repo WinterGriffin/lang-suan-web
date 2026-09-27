@@ -12,12 +12,19 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
     if (!error && data.user) {
+      const { data: existingProfile, error: profileReadError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", data.user.id)
+        .maybeSingle();
       const displayName = typeof data.user.user_metadata.display_name === "string"
         ? data.user.user_metadata.display_name.trim()
         : "";
-      const { error: profileError } = displayName
-        ? await supabase.rpc("ensure_profile", { p_display_name: displayName })
-        : { error: new Error("missing display name") };
+      const { error: profileError } = existingProfile && !profileReadError
+        ? { error: null }
+        : displayName
+          ? await supabase.rpc("ensure_profile", { p_display_name: displayName })
+          : { error: new Error("missing display name") };
       await supabase.auth.signOut();
       if (!profileError) {
         redirectTo.searchParams.set("status", "confirmed");

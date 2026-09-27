@@ -23,6 +23,7 @@
     "config:fingerprint:production": "node scripts/config-fingerprint.mjs production",
     "auth:audit:staging": "node scripts/verify-hosted-auth.mjs staging",
     "auth:audit:production": "node scripts/verify-hosted-auth.mjs production",
+    "auth:update-confirmation-template:production": "node scripts/update-production-confirmation-template.mjs",
     "build:local": "node scripts/run-environment-command.mjs local build",
     "dev:local": "node scripts/run-environment-command.mjs local dev",
     "build:staging": "node scripts/run-environment-command.mjs staging build",

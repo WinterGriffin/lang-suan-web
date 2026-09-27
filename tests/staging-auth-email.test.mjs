@@ -119,7 +119,7 @@ test("unsafe callback URLs and unsupported Auth actions are denied", async () =>
   for (const [data, category] of [
     [{ ...payload.email_data, redirect_to: "https://app.langsuanapp.com/auth/confirm" }, "auth_redirect_origin_mismatch"],
     [{ ...payload.email_data, redirect_to: "invalid URL" }, "auth_redirect_url_invalid"],
-    [{ ...payload.email_data, email_action_type: "email_change" }, "unsupported_auth_email"],
+    [{ ...payload.email_data, email_action_type: "invite" }, "unsupported_auth_email"],
   ]) {
     const h = harness({}, { ...payload, email_data: data });
     const response = await handleStagingAuthEmail(request(), h.options);
@@ -127,6 +127,14 @@ test("unsafe callback URLs and unsupported Auth actions are denied", async () =>
     assert.equal(response.headers.get("X-Email-Result"), category);
     assert.equal(h.sent, 0);
   }
+});
+
+test("email-change confirmation links to the staging confirmation route", async () => {
+  const h = harness({}, { ...payload, email_data: { ...payload.email_data, email_action_type: "email_change" } });
+  assert.equal((await handleStagingAuthEmail(request(), h.options)).status, 200);
+  assert.equal(h.sent, 1);
+  assert.equal(h.messages[0].message.subject, "ยืนยันอีเมลสำหรับเข้าสู่ระบบ LangSuan");
+  assert.match(h.messages[0].message.text, /\/auth\/confirm\?.*type=email_change/);
 });
 
 test("recovery email links to staging reset route and never logs token or recipient", async () => {
