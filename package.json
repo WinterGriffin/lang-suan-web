@@ -38,6 +38,7 @@
     "smoke:https:staging": "node scripts/smoke-https.mjs staging",
     "smoke:https:production": "node scripts/smoke-https.mjs production"
     ,"migrate:staging": "node scripts/migrate-staging.mjs"
+    ,"migrate:production": "node scripts/migrate-production.mjs"
     ,"diagnose:staging:farm-rpc": "node scripts/diagnose-staging-farm-rpc.mjs"
     ,"test:staging:farm-rpc": "node scripts/test-staging-farm-rpc.mjs"
     ,"test:staging:create-farm-rpc": "node scripts/test-staging-create-farm-rpc.mjs"
