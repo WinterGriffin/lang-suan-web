@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npm exec -- next dev",
-    "build": "npm exec -- next build",
+    "build": "node scripts/run-environment-command.mjs local next-build",
     "start": "npm exec -- next start",
     "typecheck": "npm exec -- next typegen && npm exec -- tsc --noEmit",
     "test": "node --test tests/*.test.mjs",
@@ -37,6 +37,10 @@
     "smoke:production": "node scripts/smoke-deployment.mjs production",
     "smoke:https:staging": "node scripts/smoke-https.mjs staging",
     "smoke:https:production": "node scripts/smoke-https.mjs production"
+    ,"migrate:staging": "node scripts/migrate-staging.mjs"
+    ,"diagnose:staging:farm-rpc": "node scripts/diagnose-staging-farm-rpc.mjs"
+    ,"test:staging:farm-rpc": "node scripts/test-staging-farm-rpc.mjs"
+    ,"test:staging:create-farm-rpc": "node scripts/test-staging-create-farm-rpc.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

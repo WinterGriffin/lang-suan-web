@@ -11,12 +11,13 @@ import "./farms.css";
 type Farm = Tables<"farms">;
 type Sale = Tables<"sales">;
 type Role = Database["public"]["Enums"]["farm_role"];
-type Draft = { name: string; produceName: string; shareInput: "OWNER" | "WORKER"; isActive: boolean };
+type Draft = { name: string; produceName: string; shareInput: "OWNER" | "WORKER"; hasWorkers: boolean; isActive: boolean };
 
 const toDraft = (farm: Farm): Draft => ({
   name: farm.name,
   produceName: farm.produce_name,
   shareInput: farm.default_share_input,
+  hasWorkers: farm.has_workers,
   isActive: farm.is_active,
 });
 
@@ -121,6 +122,7 @@ export default function FarmsPage() {
       p_name: draft.name.trim(),
       p_produce_name: draft.produceName.trim(),
       p_share_input: draft.shareInput,
+      p_has_workers: draft.hasWorkers,
       p_is_active: draft.isActive,
     });
     setSaving(false);
@@ -160,6 +162,7 @@ export default function FarmsPage() {
           <label>ชื่อฟาร์ม<input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} maxLength={120} /></label>
           <label>ผลผลิต<input value={draft.produceName} onChange={(event) => setDraft({ ...draft, produceName: event.target.value })} maxLength={120} /></label>
           <label>ด้านที่กรอกส่วนแบ่ง<select value={draft.shareInput} onChange={(event) => setDraft({ ...draft, shareInput: event.target.value as Draft["shareInput"] })}><option value="OWNER">OWNER (เจ้าของ)</option><option value="WORKER">WORKER (ลูกจ้าง)</option></select></label>
+          <label className="checkbox-label"><input type="checkbox" checked={draft.hasWorkers} onChange={(event) => setDraft({ ...draft, hasWorkers: event.target.checked })} /> ฟาร์มนี้มีลูกจ้าง</label>
           <label className="checkbox-label"><input type="checkbox" checked={draft.isActive} onChange={(event) => setDraft({ ...draft, isActive: event.target.checked })} /> เปิดใช้สำหรับการสร้างรายการขายใหม่</label>
           <p className="notice">การเปลี่ยนส่วนแบ่งมีผลกับรายการใหม่เท่านั้น รายการย้อนหลังใช้ snapshot เดิม</p>
           <button className="button primary" type="button" onClick={() => void save()} disabled={saving}>{saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}</button>

@@ -21,6 +21,8 @@ export default function SaleDetailPage() {
   const [sale, setSale] = useState<Sale | null>(null);
   const [audits, setAudits] = useState<Audit[]>([]);
   const [canEdit, setCanEdit] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [state, setState] = useState("กำลังโหลดข้อมูล…");
 
   useEffect(() => { void (async () => {
@@ -37,14 +39,21 @@ export default function SaleDetailPage() {
     const { data: history } = await client.from("audit_logs").select("*").eq("table_name", "sales").contains("record_key", { id }).order("occurred_at", { ascending: false }).order("id", { ascending: false });
     setAudits(history ?? []);
   })(); }, [id]);
+  const remove = async () => {
+    if (!sale || deleting) return;
+    setDeleting(true);
+    const { error } = await createClient().rpc("soft_delete_sale", { p_id: sale.id, p_expected_version: sale.version });
+    if (error) { setDeleting(false); setConfirmDelete(false); setState(error.code === "40001" ? "รายการนี้ถูกแก้ไขแล้ว กรุณากลับไปโหลดข้อมูลล่าสุด" : "ไม่สามารถลบรายการขายนี้ได้"); return; }
+    window.location.assign("/sales?deleted=1");
+  };
 
   return <AppShell active="sales" title="รายละเอียดการขาย">
     {search.get("saved") === "1" && <p className="form-success" role="status">บันทึกการขายแล้ว</p>}
     {state ? <section className="empty-state"><p>{state}</p><Link className="button primary" href="/sales">กลับหน้าการขาย</Link></section> : sale && <div className="detail-layout">
-      <section className="panel"><div className="page-intro"><div><p className="eyebrow">{thaiDate(sale.sale_date)}</p><h2>{sale.produce_name_snapshot}</h2></div>{canEdit && <Link className="button primary" href={`/sales/${sale.id}/edit`}>แก้ไขรายการ</Link>}</div>
+      <section className="panel"><div className="page-intro"><div><p className="eyebrow">{thaiDate(sale.sale_date)}</p><h2>{sale.produce_name_snapshot}</h2></div><div className="sale-actions"><Link className="button primary" href="/sales/new">+ บันทึกการขาย</Link>{canEdit && <Link className="profile-button" href={`/sales/${sale.id}/edit`}>แก้ไขรายการ</Link>}{canEdit && <button className="button destructive" type="button" onClick={() => setConfirmDelete(true)}>ลบรายการขาย</button>}</div></div>
         <div className="sale-total">{money(sale.total_amount)} <small>บาท</small></div>
         <dl className="detail-grid"><dt>น้ำหนัก</dt><dd>{sale.weight_kg} kg</dd><dt>ราคาต่อกิโลกรัม</dt><dd>{money(sale.unit_price)} บาท</dd><dt>ส่วนเจ้าของ</dt><dd>{money(sale.owner_share)} บาท</dd><dt>ส่วนลูกจ้าง</dt><dd>{money(sale.worker_share)} บาท</dd><dt>ด้านที่กรอกตอนสร้าง</dt><dd>{sale.share_input_type}</dd><dt>เวอร์ชัน</dt><dd>{sale.version}</dd></dl>
-      </section>
+      </section>{confirmDelete && <div className="confirm-backdrop" role="presentation"><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-title"><h2 id="delete-title">ลบรายการขาย?</h2><p>รายการขายนี้จะถูกนำออกจากยอดขาย รายงาน และการคำนวณทั้งหมด</p><dl><dt>ฟาร์ม</dt><dd>{sale.produce_name_snapshot}</dd><dt>วันที่</dt><dd>{thaiDate(sale.sale_date)}</dd><dt>ยอดขายรวม</dt><dd>{money(sale.total_amount)} บาท</dd></dl><div className="sale-actions"><button className="profile-button" type="button" onClick={() => setConfirmDelete(false)} disabled={deleting}>ยกเลิก</button><button className="button destructive" type="button" onClick={() => void remove()} disabled={deleting}>{deleting ? "กำลังลบ…" : "ลบรายการขาย"}</button></div></section></div>}
       <section className="panel"><h2>ประวัติการเปลี่ยนแปลง</h2>{audits.length === 0 ? <p className="muted">ยังไม่มีประวัติที่คุณมีสิทธิ์อ่าน</p> : <ol className="audit-list">{audits.map((audit) => <li key={audit.id}><b>{audit.action === "INSERT" ? "สร้างรายการ" : "แก้ไขรายการ"}</b><span>{new Intl.DateTimeFormat("th-TH", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Bangkok" }).format(new Date(audit.occurred_at))}</span><small>เปลี่ยน: {changedFields(audit)} · ผู้ใช้ {audit.actor_id ?? "ระบบ"}</small></li>)}</ol>}</section>
     </div>}
   </AppShell>;
