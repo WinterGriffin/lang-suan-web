@@ -87,6 +87,19 @@ No fertilizer, fields, inventory, costs/profit, adjustments, discounts, payments
   and deletion are controlled remediation operations after the owner proves
   control of both identities; they are never automatic browser behavior.
 
+## 3.3 Reports revenue-share amendment — 22 October 2026
+
+- Reports show **ยอดขายรวม** (sum of `total_amount`) and **การแบ่งส่วนแบ่งรายได้**
+  (sums of stored `owner_share` as เจ้าของสวน and `worker_share` as คนงาน) for
+  the selected year across permitted Farms, above the existing tabs. Monthly and
+  Farm comparison tables add selected-year owner/worker columns.
+- These shares divide gross sales; they are not net profit. No costs, profit,
+  percentages, approval status or share configuration are shown or introduced.
+- The stacked bar is visual only and is omitted when the period has no sales or
+  both shares are zero. A period without sales shows “ไม่มีรายการขาย”, distinct
+  from a stored 0.00 share. The existing metric selector, tabs and `sales_summary`
+  data source are unchanged; no migration is required.
+
 ## 4. Numbers and dates: canonical rules
 
 All business arithmetic is decimal, never binary float in production. RPC inputs are decimal strings. Reject excess input precision **before** storing into constrained numeric columns. PostgreSQL numeric rounds ties away from zero; with valid positive totals this is half-up.

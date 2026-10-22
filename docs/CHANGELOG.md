@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Reports now show ยอดขายรวม and การแบ่งส่วนแบ่งรายได้ (เจ้าของสวน / คนงาน) for
+  the selected year from the existing `sales_summary` owner/worker sums, with
+  owner/worker columns in the Monthly and Farm comparison tables. The owner chose
+  a revenue-share heading instead of “กำไรสุทธิ” because the data model has no
+  costs or profit (spec §3.3). Fixed `money()` formatting of negative amounts,
+  which previously rendered values such as `-1.-50` in Dashboard comparisons.
+
 - Fixed the duplicate-profile path for an authenticated LINE user: Register
   now adds and verifies an email/password identity on the existing Auth user
   instead of creating a second Auth user/profile. Identity matching is based
