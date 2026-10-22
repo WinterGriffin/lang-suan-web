@@ -1,0 +1,120 @@
+{
+  "project": "LangSuan",
+  "feature": "reports-revenue-share",
+  "reviewed_commit": "3f71b17506f5363c995082fa8afa6a9932a74b6d",
+  "qa_status": "QA_BLOCKED",
+  "tests": [
+    {
+      "id": "QA-01",
+      "name": "Total sales matches database records",
+      "status": "BLOCKED",
+      "evidence": "Fixture total 1,350.49 passed; authenticated staging database-to-display comparison unavailable."
+    },
+    {
+      "id": "QA-02",
+      "name": "Owner allocation matches database records",
+      "status": "BLOCKED",
+      "evidence": "Fixture owner 700.24 passed; no authenticated staging records/display comparison."
+    },
+    {
+      "id": "QA-03",
+      "name": "Laborer allocation matches database records",
+      "status": "BLOCKED",
+      "evidence": "Fixture worker 650.25 passed; no authenticated staging records/display comparison."
+    },
+    {
+      "id": "QA-04",
+      "name": "Selected-year filter",
+      "status": "BLOCKED",
+      "evidence": "Source retains selected-year exclusive end boundaries; runtime filter interaction not verified."
+    },
+    {
+      "id": "QA-05",
+      "name": "Monthly figures",
+      "status": "BLOCKED",
+      "evidence": "Fixture January owner 700.24 and worker 400.25 pass; staging monthly display not verified."
+    },
+    {
+      "id": "QA-06",
+      "name": "Farm comparison",
+      "status": "BLOCKED",
+      "evidence": "Fixture farm B sales 99.99 and worker 0.00 pass; staging farm comparison not verified."
+    },
+    {
+      "id": "QA-07",
+      "name": "Missing allocation",
+      "status": "PASS",
+      "evidence": "Source assertion verifies no-sales state, distinct from zero. Schema-generated NOT NULL input-derived allocations cannot be missing on valid stored sales; this does not prove handling malformed RPC payloads."
+    },
+    {
+      "id": "QA-08",
+      "name": "Zero allocations",
+      "status": "PASS",
+      "evidence": "Executed zero-value fixtures; worker 0.00, owner-only/worker-only ratios, and both-zero bar suppression pass."
+    },
+    {
+      "id": "QA-09",
+      "name": "Financial formatting",
+      "status": "PASS",
+      "evidence": "Executed formatting assertions: grouping, two decimals, zero, fractional cents representation and negative comparison signs pass."
+    },
+    {
+      "id": "QA-10",
+      "name": "Distribution bar",
+      "status": "PASS",
+      "evidence": "Executed stored-sum ratio 51.85%, zero and invalid-negative guards; source only sets visual widths, no writes."
+    },
+    {
+      "id": "QA-11",
+      "name": "Farm isolation",
+      "status": "BLOCKED",
+      "evidence": "Static security-invoker RPC and sales RLS reviewed; real JWT isolation fixture not executed."
+    },
+    {
+      "id": "QA-12",
+      "name": "Desktop/mobile UI",
+      "status": "BLOCKED",
+      "evidence": "CSS/markup assertions pass; no authenticated rendered Reports checks at 375, 768, >=1100 pixels."
+    }
+  ],
+  "findings": [],
+  "blocked_checks": [
+    {
+      "id": "QA-01",
+      "reason": "Fixture total 1,350.49 passed; authenticated staging database-to-display comparison unavailable."
+    },
+    {
+      "id": "QA-02",
+      "reason": "Fixture owner 700.24 passed; no authenticated staging records/display comparison."
+    },
+    {
+      "id": "QA-03",
+      "reason": "Fixture worker 650.25 passed; no authenticated staging records/display comparison."
+    },
+    {
+      "id": "QA-04",
+      "reason": "Source retains selected-year exclusive end boundaries; runtime filter interaction not verified."
+    },
+    {
+      "id": "QA-05",
+      "reason": "Fixture January owner 700.24 and worker 400.25 pass; staging monthly display not verified."
+    },
+    {
+      "id": "QA-06",
+      "reason": "Fixture farm B sales 99.99 and worker 0.00 pass; staging farm comparison not verified."
+    },
+    {
+      "id": "QA-11",
+      "reason": "Static security-invoker RPC and sales RLS reviewed; real JWT isolation fixture not executed."
+    },
+    {
+      "id": "QA-12",
+      "reason": "CSS/markup assertions pass; no authenticated rendered Reports checks at 375, 768, >=1100 pixels."
+    },
+    {
+      "id": "STAGING-IDENTITY",
+      "reason": "Run 39716824022 independently reports exact head_sha and successful staging deployment; live staging health and amendment bundle match. Health version is unknown, so exact currently served SHA cannot be proven from runtime identity alone."
+    }
+  ],
+  "out_of_scope_observations": []
+}
