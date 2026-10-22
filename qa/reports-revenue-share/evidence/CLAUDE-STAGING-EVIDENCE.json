@@ -1,0 +1,40 @@
+{
+  "project": "LangSuan",
+  "feature": "reports-revenue-share",
+  "collector": "Claude Code",
+  "collected_at": "2026-10-22T04:02:00Z",
+  "reviewed_sha": "3f71b17506f5363c995082fa8afa6a9932a74b6d",
+  "qa_commit_read": "9765537f8e2003fb7fc78000ca496fee7444e0f2",
+  "summary": { "pass": 0, "fail": 0, "blocked": 9 },
+  "checks": [
+    {
+      "id": "STAGING-IDENTITY",
+      "status": "BLOCKED",
+      "evidence": "Latest GitHub staging deployment 7242925439 is sha 3f71b17 (status success). Run 39716824022 succeeded. No later staging runs, deployments or main commits. Live chunk page-C7tE2Hqi.js (sha256 27ad36614becae364b07ba59a5cdadb6309a04189b01e819425c286aa33b9b19) contains the amendment heading. Health version is unknown.",
+      "blocker": "No Cloudflare Worker version/deployment record for lang-suan-staging mapped to 3f71b17. Earlier staging deploys may have been made outside GitHub."
+    },
+    { "id": "QA-01", "name": "Total sales", "status": "BLOCKED", "expected": null, "observed": null, "blocker": "No authorized authenticated staging session or read-only data access." },
+    { "id": "QA-02", "name": "Owner allocation", "status": "BLOCKED", "expected": null, "observed": null, "blocker": "No authorized authenticated staging session or read-only data access." },
+    { "id": "QA-03", "name": "Worker allocation", "status": "BLOCKED", "expected": null, "observed": null, "blocker": "No authorized authenticated staging session or read-only data access." },
+    { "id": "QA-04", "name": "Selected-year filter", "status": "BLOCKED", "expected": null, "observed": null, "blocker": "No authorized authenticated staging session or read-only data access." },
+    { "id": "QA-05", "name": "Monthly figures", "status": "BLOCKED", "expected": null, "observed": null, "blocker": "No authorized authenticated staging session or read-only data access." },
+    { "id": "QA-06", "name": "Farm comparison", "status": "BLOCKED", "expected": null, "observed": null, "blocker": "No authorized authenticated staging session or read-only data access." },
+    { "id": "QA-11", "name": "Farm isolation", "status": "BLOCKED", "expected": null, "observed": null, "blocker": "Two existing staging identities with different farm permissions not available." },
+    { "id": "QA-12", "name": "Responsive Reports UI", "status": "BLOCKED", "expected": null, "observed": null, "blocker": "No authenticated browser session; no rendering at 375/768/>=1100px." }
+  ],
+  "evidence_links": [
+    "https://github.com/WinterGriffin/lang-suan-web/actions/runs/39716824022",
+    "https://github.com/WinterGriffin/lang-suan-web/actions/runs/39716824022/job/119620808645",
+    "https://api.github.com/repos/WinterGriffin/lang-suan-web/deployments/7242925439/statuses",
+    "https://staging.langsuanapp.com/api/health",
+    "https://staging.langsuanapp.com/_next/static/chunks/page-C7tE2Hqi.js"
+  ],
+  "unresolved_blockers": [
+    "Cloudflare Worker version/deployment record for lang-suan-staging (read-only, staging-scoped token).",
+    "Authorized authenticated staging session for Reports with permitted farms.",
+    "Second existing staging identity restricted to a different farm.",
+    "Read-only aggregate query access to staging active sales (or a user-scoped sales_summary call).",
+    "Browser session to render /reports at 375, 768 and >=1100 px."
+  ],
+  "production_accessed": false
+}
