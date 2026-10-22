@@ -1,0 +1,17 @@
+# Owner action required
+
+Overall: QA_BLOCKED. No application correction is justified by the available evidence. Supply one of the permitted evidence/access routes below; do not send secrets in GitHub files.
+
+1. STAGING-IDENTITY: provide sanitized read-only Cloudflare evidence for the currently active `lang-suan-staging` deployment, all serving version IDs/traffic weights, and immutable build/version or artifact metadata that maps those versions directly to feature `3f71b17506f5363c995082fa8afa6a9932a74b6d`. Dates and GitHub deployment history alone are insufficient. Alternatively explicitly provide an approved staging-only read-only access mechanism. No deploy or configuration change is requested.
+2. QA-01 through QA-06: explicitly authorize an existing staging identity/session with read-only access to its permitted sales, or provide equivalent sanitized source aggregates and matching authenticated Reports evidence. Use active sales (deleted_at IS NULL), selected Gregorian range [Y-01-01, (Y+1)-01-01), and only that user's permitted farms. Include selected-year sales/owner/worker totals, month/farm breakdowns, and corresponding year-switch/monthly/farm UI observations. Do not create or alter financial records.
+3. QA-11: explicitly authorize two existing staging identities with disjoint farm access, or provide sanitized test observations for each identity showing permitted farms, unfiltered sales_summary farm results, and zero rows for explicit foreign-farm filtering. Omit JWTs, cookies, passwords, personal identifiers and unnecessary financial details. Do not create identities or change permissions; do not execute the write-based SQL fixture on staging.
+4. QA-12: provide an explicitly authorized authenticated staging Reports session, or sanitized captures/observations at 375px, 768px and >=1100px. Evidence must cover the amended total-sales/share cards, distribution bar and added allocation columns; verify contained table scrolling and absence of page overflow. Do not include private figures in committed screenshots.
+
+QA-07 through QA-10 retain the original passed results and must not be repeated for this follow-up. Upon receipt of authorized evidence, verify only the nine pending checks. No credential discovery, policy circumvention, production access, app/configuration changes, database writes, permission changes, deployments or main merge are authorized.
+
+## Immutable source links
+
+- [qa/reports-revenue-share/GEMINI-QA-REPORT.md](https://github.com/WinterGriffin/lang-suan-web/blob/9765537f8e2003fb7fc78000ca496fee7444e0f2/qa/reports-revenue-share/GEMINI-QA-REPORT.md) (branch `qa/reports-revenue-share-review`)
+- [qa/reports-revenue-share/GEMINI-QA-FINDINGS.json](https://github.com/WinterGriffin/lang-suan-web/blob/9765537f8e2003fb7fc78000ca496fee7444e0f2/qa/reports-revenue-share/GEMINI-QA-FINDINGS.json) (branch `qa/reports-revenue-share-review`)
+- [qa/reports-revenue-share/evidence/CLAUDE-STAGING-EVIDENCE.md](https://github.com/WinterGriffin/lang-suan-web/blob/31f11353ea28c5cdfd7d4ac3515440aaab75f231/qa/reports-revenue-share/evidence/CLAUDE-STAGING-EVIDENCE.md) (branch `evidence/reports-revenue-share-staging`)
+- [qa/reports-revenue-share/evidence/CLAUDE-QA-HANDOFF.md](https://github.com/WinterGriffin/lang-suan-web/blob/31f11353ea28c5cdfd7d4ac3515440aaab75f231/qa/reports-revenue-share/evidence/CLAUDE-QA-HANDOFF.md) (branch `evidence/reports-revenue-share-staging`)

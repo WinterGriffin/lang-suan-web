@@ -1,0 +1,166 @@
+{
+  "project": "LangSuan",
+  "repository": "WinterGriffin/lang-suan-web",
+  "feature": "reports-revenue-share",
+  "reviewed_feature_sha": "3f71b17506f5363c995082fa8afa6a9932a74b6d",
+  "original_qa_sha": "9765537f8e2003fb7fc78000ca496fee7444e0f2",
+  "claude_evidence_sha": "31f11353ea28c5cdfd7d4ac3515440aaab75f231",
+  "qa_branch": "qa/reports-revenue-share-final-review",
+  "qa_status": "QA_BLOCKED",
+  "sources": [
+    {
+      "commit": "9765537f8e2003fb7fc78000ca496fee7444e0f2",
+      "branch": "qa/reports-revenue-share-review",
+      "path": "qa/reports-revenue-share/GEMINI-QA-REPORT.md",
+      "url": "https://github.com/WinterGriffin/lang-suan-web/blob/9765537f8e2003fb7fc78000ca496fee7444e0f2/qa/reports-revenue-share/GEMINI-QA-REPORT.md"
+    },
+    {
+      "commit": "9765537f8e2003fb7fc78000ca496fee7444e0f2",
+      "branch": "qa/reports-revenue-share-review",
+      "path": "qa/reports-revenue-share/GEMINI-QA-FINDINGS.json",
+      "url": "https://github.com/WinterGriffin/lang-suan-web/blob/9765537f8e2003fb7fc78000ca496fee7444e0f2/qa/reports-revenue-share/GEMINI-QA-FINDINGS.json"
+    },
+    {
+      "commit": "31f11353ea28c5cdfd7d4ac3515440aaab75f231",
+      "branch": "evidence/reports-revenue-share-staging",
+      "path": "qa/reports-revenue-share/evidence/CLAUDE-STAGING-EVIDENCE.md",
+      "url": "https://github.com/WinterGriffin/lang-suan-web/blob/31f11353ea28c5cdfd7d4ac3515440aaab75f231/qa/reports-revenue-share/evidence/CLAUDE-STAGING-EVIDENCE.md"
+    },
+    {
+      "commit": "31f11353ea28c5cdfd7d4ac3515440aaab75f231",
+      "branch": "evidence/reports-revenue-share-staging",
+      "path": "qa/reports-revenue-share/evidence/CLAUDE-QA-HANDOFF.md",
+      "url": "https://github.com/WinterGriffin/lang-suan-web/blob/31f11353ea28c5cdfd7d4ac3515440aaab75f231/qa/reports-revenue-share/evidence/CLAUDE-QA-HANDOFF.md"
+    }
+  ],
+  "authorization_assessment": {
+    "owner_authorized_scope": "Read supplied GitHub evidence; perform pending checks only if explicitly supplied access or evidence exists; create and push three QA documents.",
+    "necessary_access_provided": false,
+    "sufficient_sanitized_evidence_provided": false,
+    "credential_discovery_attempted": false,
+    "live_staging_checks_executed": false
+  },
+  "tests": [
+    {
+      "id": "STAGING-IDENTITY",
+      "name": "Current active Worker version to feature SHA",
+      "status": "BLOCKED",
+      "reason": "No owner-provided staging Worker active-version record or verifiable artifact-to-feature-SHA mapping. GitHub run, cached chunk, timestamps and unknown health version do not establish exact current deployment identity.",
+      "execution": "Authorized evidence reviewed only; live check not executed."
+    },
+    {
+      "id": "QA-01",
+      "name": "Selected-year total sales",
+      "status": "BLOCKED",
+      "reason": "No explicitly supplied authenticated staging session or authorized read-only sales evidence paired with Reports output.",
+      "execution": "Authorized evidence reviewed only; live check not executed."
+    },
+    {
+      "id": "QA-02",
+      "name": "Owner allocation",
+      "status": "BLOCKED",
+      "reason": "No authorized staging owner-share aggregates paired with Reports output.",
+      "execution": "Authorized evidence reviewed only; live check not executed."
+    },
+    {
+      "id": "QA-03",
+      "name": "Laborer allocation",
+      "status": "BLOCKED",
+      "reason": "No authorized staging worker-share aggregates paired with Reports output.",
+      "execution": "Authorized evidence reviewed only; live check not executed."
+    },
+    {
+      "id": "QA-04",
+      "name": "Selected-year filter",
+      "status": "BLOCKED",
+      "reason": "No authenticated year-switch observations or equivalent sanitized evidence of selected boundaries and updated sections.",
+      "execution": "Authorized evidence reviewed only; live check not executed."
+    },
+    {
+      "id": "QA-05",
+      "name": "Monthly figures",
+      "status": "BLOCKED",
+      "reason": "No authorized monthly aggregates paired with amended monthly Reports output.",
+      "execution": "Authorized evidence reviewed only; live check not executed."
+    },
+    {
+      "id": "QA-06",
+      "name": "Farm comparison",
+      "status": "BLOCKED",
+      "reason": "No authorized per-farm aggregates paired with amended farm Reports output.",
+      "execution": "Authorized evidence reviewed only; live check not executed."
+    },
+    {
+      "id": "QA-11",
+      "name": "Farm-data isolation",
+      "status": "BLOCKED",
+      "reason": "No two existing explicitly authorized identities with disjoint farm permissions or sanitized identity-scoped isolation results.",
+      "execution": "Authorized evidence reviewed only; live check not executed."
+    },
+    {
+      "id": "QA-12",
+      "name": "Responsive Reports UI",
+      "status": "BLOCKED",
+      "reason": "No authenticated Reports renders or sanitized observations at 375px, 768px and >=1100px.",
+      "execution": "Authorized evidence reviewed only; live check not executed."
+    }
+  ],
+  "counts": {
+    "pass": 0,
+    "fail": 0,
+    "blocked": 9
+  },
+  "carried_forward_not_reexecuted": [
+    "QA-07",
+    "QA-08",
+    "QA-09",
+    "QA-10"
+  ],
+  "findings": [],
+  "blocked_checks": [
+    {
+      "id": "STAGING-IDENTITY",
+      "reason": "No owner-provided staging Worker active-version record or verifiable artifact-to-feature-SHA mapping. GitHub run, cached chunk, timestamps and unknown health version do not establish exact current deployment identity."
+    },
+    {
+      "id": "QA-01",
+      "reason": "No explicitly supplied authenticated staging session or authorized read-only sales evidence paired with Reports output."
+    },
+    {
+      "id": "QA-02",
+      "reason": "No authorized staging owner-share aggregates paired with Reports output."
+    },
+    {
+      "id": "QA-03",
+      "reason": "No authorized staging worker-share aggregates paired with Reports output."
+    },
+    {
+      "id": "QA-04",
+      "reason": "No authenticated year-switch observations or equivalent sanitized evidence of selected boundaries and updated sections."
+    },
+    {
+      "id": "QA-05",
+      "reason": "No authorized monthly aggregates paired with amended monthly Reports output."
+    },
+    {
+      "id": "QA-06",
+      "reason": "No authorized per-farm aggregates paired with amended farm Reports output."
+    },
+    {
+      "id": "QA-11",
+      "reason": "No two existing explicitly authorized identities with disjoint farm permissions or sanitized identity-scoped isolation results."
+    },
+    {
+      "id": "QA-12",
+      "reason": "No authenticated Reports renders or sanitized observations at 375px, 768px and >=1100px."
+    }
+  ],
+  "limitations": [
+    "No newly verified functional pass or defect. Prior observations are attributed to their immutable GitHub sources.",
+    "Claude handoff timestamp-only identity acceptance is superseded by owner requirement for verifiable active Worker version to feature commit mapping."
+  ],
+  "production_access": false,
+  "application_changes": false,
+  "deployment_performed": false,
+  "database_writes": false
+}
