@@ -42,6 +42,7 @@
     ,"diagnose:staging:farm-rpc": "node scripts/diagnose-staging-farm-rpc.mjs"
     ,"test:staging:farm-rpc": "node scripts/test-staging-farm-rpc.mjs"
     ,"test:staging:create-farm-rpc": "node scripts/test-staging-create-farm-rpc.mjs"
+    ,"qa:staging:sql": "node scripts/qa-staging-sql.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
