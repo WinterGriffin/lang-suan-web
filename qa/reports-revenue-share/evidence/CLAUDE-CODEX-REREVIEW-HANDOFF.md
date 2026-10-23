@@ -20,7 +20,17 @@ Your final review (`1109267`, `qa/reports-revenue-share-final-review`) was commi
      - output limited to four allowlisted columns, with redaction.
 3. **Path A live results**: `CLAUDE-PATH-A-RESULTS.md` in this directory. 13 PASS, 0 FAIL, 0 BLOCKED. This covers the database half of QA-01 to QA-06, and QA-11.
 
-## Still pending
+## Update — 23 October 2026
+
+QA-12 and the on-screen half of QA-01 to QA-06 are now recorded in `CLAUDE-QA-12-RESULTS.md`:
+
+- The signed-in account is user_b. The on-screen figures match the Path A SQL results.
+- 1536 px and 768 px PASS.
+- 502 px PASS in the mobile layout; the owner waived 375 px.
+
+The section below is kept for history.
+
+## Previously pending
 
 - **QA-12 and the on-screen half of QA-01 to QA-06:**
   - The owner is signed in to staging, but Claude had no browser tools.

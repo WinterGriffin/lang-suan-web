@@ -34,6 +34,8 @@ The table headers include the new `เจ้าของสวน (2569)` and `�
 - Cosmetic, not a defect: at 768 px "7,250.00 บาท" wraps onto two lines, and narrow value cells wrap ("0.00 / บาท"). Everything stays readable and nothing is clipped.
 - An iframe used to try narrower widths was refused by staging's framing protection and removed immediately. It wrote no data.
 
-## Remaining
+## Owner decision on 375 px
 
-- 375 px needs device emulation, either the DevTools device toolbar or a Playwright viewport, run by the owner or a session with emulation.
+On 23 October 2026 the owner accepted the 502 px result as sufficient evidence for the mobile layout, which applies at every width below the 760 px breakpoint. **375 px itself remains untested.** Treat it as a waiver accepted by the owner, not a 375 px PASS.
+
+QA-12 status: **PASS with an owner waiver for 375 px.**
