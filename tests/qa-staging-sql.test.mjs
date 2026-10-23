@@ -16,8 +16,8 @@ test("reviewed Reports QA SQL is allowlisted, pinned and passes the read-only li
   assert.deepEqual(Object.keys(allowlist), [file]);
   assert.equal(sha256(sql), allowlist[file]);
   assert.equal(lintSql(sql), 12);
-  assert.match(sql, /^begin;\nset transaction read only;/m);
-  assert.match(sql, /\nrollback;\s*$/);
+  assert.match(sql, /^begin;\r?\nset transaction read only;/m);
+  assert.match(sql, /\r?\nrollback;\s*$/);
 });
 
 test("lint rejects persistent writes and privilege changes", () => {
